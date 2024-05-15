@@ -204,7 +204,7 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
                             onPressed: activeFilters != null ? _clearFilters : null,
                             child: Text('Clear Filters'),
                             style: ElevatedButton.styleFrom(
-                              primary: activeFilters != null ? Theme.of(context).primaryColor : Colors.grey,
+                              backgroundColor: activeFilters != null ? Theme.of(context).primaryColor : Colors.grey,
                             ),
                           ),
                         ],

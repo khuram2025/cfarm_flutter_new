@@ -142,7 +142,7 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                 ElevatedButton(
                   onPressed: _handleLogin,
                   style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF0DA487),
+                    backgroundColor: Color(0xFF0DA487),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
                     ),

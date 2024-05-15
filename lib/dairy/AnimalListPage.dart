@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:untitled3/dairy/AnimalDetail.dart';
-import 'package:untitled3/dairy/animalFilterScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/animals.dart';
 import '../widgets/animalListCard.dart';
+import 'AnimalDetail.dart';
+import 'animalFilterScreen.dart';
 
 final String baseUrl = 'http://farmapp.channab.com';
 
@@ -51,7 +52,6 @@ class _AnimalListMobilePageState extends State<AnimalListMobilePage> {
       List<dynamic> animalsJson = json.decode(response.body);
       List<Animal> fetchedAnimals = animalsJson.map((json) => Animal.fromJson(json)).toList();
 
-      // Calculate counts by type
       Map<String, int> counts = {
         'All': fetchedAnimals.length,
         'milking': fetchedAnimals.where((animal) => animal.animalType == 'milking').length,
@@ -76,11 +76,8 @@ class _AnimalListMobilePageState extends State<AnimalListMobilePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
 
-    String url = type == 'All'
-        ? '$baseUrl/dairy/api/animals/'
-        : '$baseUrl/dairy/api/animals/?animal_type=$type';
+    String url = '$baseUrl/dairy/api/animals/?animal_type=$type';
 
-    // Apply filters to the URL
     if (filters != null) {
       filters.forEach((key, value) {
         if (value is String && value != 'All') {
@@ -97,7 +94,7 @@ class _AnimalListMobilePageState extends State<AnimalListMobilePage> {
       });
     }
 
-    print('Fetching animals with type: $type and filters: $filters');
+    print('Fetching animals with URL: $url');
     final response = await http.get(
       Uri.parse(url),
       headers: {

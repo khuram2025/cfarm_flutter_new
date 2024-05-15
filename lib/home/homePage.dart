@@ -21,21 +21,21 @@ class HomePage extends StatelessWidget {
                   onPressed: () {},
                   child: Text('This Month'),
                   style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF0DA487),
+                    backgroundColor: Color(0xFF0DA487),
                   ),
                 ),
                 ElevatedButton(
                   onPressed: () {},
                   child: Text('Last 3 Months'),
                   style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF0DA487),
+                    backgroundColor: Color(0xFF0DA487),
                   ),
                 ),
                 ElevatedButton(
                   onPressed: () {},
                   child: Text('Last Month'),
                   style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF0DA487),
+                    backgroundColor: Color(0xFF0DA487),
                   ),
                 ),
               ],
