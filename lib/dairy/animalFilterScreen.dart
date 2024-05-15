@@ -17,7 +17,8 @@ class AnimalFilterPage extends StatefulWidget {
 class _AnimalFilterPageState extends State<AnimalFilterPage> {
   String _selectedCategory = 'All';
   String _selectedType = 'All';
-  RangeValues _ageRange = const RangeValues(0, 20);
+  int _minMonths = 0;
+  int _maxMonths = 240; // 20 years in months
   bool _isMale = false;
   bool _isFemale = false;
   String _selectedStatus = 'active';
@@ -72,13 +73,18 @@ class _AnimalFilterPageState extends State<AnimalFilterPage> {
     Map<String, dynamic> filters = {
       'category': _selectedCategory,
       'type': _selectedType,
-      'ageRange': _ageRange,
-      'sex': {
-        'male': _isMale,
-        'female': _isFemale,
-      },
+      'minMonths': _minMonths,
+      'maxMonths': _maxMonths,
+      'sex': _isMale && _isFemale
+          ? 'both'
+          : _isMale
+          ? 'male'
+          : _isFemale
+          ? 'female'
+          : '',
       'status': _selectedStatus,
     };
+    print('Applying filters: $filters');  // Add this print statement for debugging
     widget.onApplyFilter(filters);
     Navigator.pop(context);
   }
@@ -131,24 +137,45 @@ class _AnimalFilterPageState extends State<AnimalFilterPage> {
               },
             ),
             SizedBox(height: 16),
+            // Animal Age Filter in Months
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Animal Age (Years)', style: TextStyle(fontWeight: FontWeight.bold)),
-                RangeSlider(
-                  values: _ageRange,
-                  min: 0,
-                  max: 20,
-                  divisions: 20,
-                  labels: RangeLabels(
-                    '${_ageRange.start.round()}',
-                    '${_ageRange.end.round()}',
-                  ),
-                  onChanged: (RangeValues values) {
-                    setState(() {
-                      _ageRange = values;
-                    });
-                  },
+                Text('Animal Age (Months)', style: TextStyle(fontWeight: FontWeight.bold)),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: _minMonths.toString(),
+                        decoration: InputDecoration(
+                          labelText: 'Min Months',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          setState(() {
+                            _minMonths = int.parse(value);
+                          });
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: _maxMonths.toString(),
+                        decoration: InputDecoration(
+                          labelText: 'Max Months',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          setState(() {
+                            _maxMonths = int.parse(value);
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -225,7 +252,8 @@ class _AnimalFilterPageState extends State<AnimalFilterPage> {
                     setState(() {
                       _selectedCategory = 'All';
                       _selectedType = 'All';
-                      _ageRange = const RangeValues(0, 20);
+                      _minMonths = 0;
+                      _maxMonths = 240;
                       _isMale = false;
                       _isFemale = false;
                       _selectedStatus = 'active';

@@ -88,8 +88,8 @@ class _AnimalListMobilePageState extends State<AnimalListMobilePage> {
               url += '&$key=$subKey';
             }
           });
-        } else if (value is RangeValues) {
-          url += '&age_min=${value.start.round()}&age_max=${value.end.round()}';
+        } else if (value is int) {
+          url += '&$key=$value';
         }
       });
     }
@@ -116,7 +116,8 @@ class _AnimalListMobilePageState extends State<AnimalListMobilePage> {
   }
 
   void _applyFilters(Map<String, dynamic> filters) {
-    fetchAnimals(selectedType!, filters); // Apply the filters to fetch animals
+    print('Filters applied: $filters'); // Add this print statement for debugging
+    fetchAnimals('All', filters); // Apply the filters to fetch animals
   }
 
   @override
