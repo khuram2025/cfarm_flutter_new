@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../Finance/transactionsScreen.dart';
+
 class CustomDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -37,7 +39,12 @@ class CustomDrawer extends StatelessWidget {
             title: Text('Expense'),
             onTap: () {
               Navigator.pop(context); // Close the drawer
-              Navigator.pushNamed(context, '/transactions', arguments: false);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TransactionPageWidget(isIncome: false),
+                ),
+              );
             },
           ),
           ListTile(
@@ -45,9 +52,16 @@ class CustomDrawer extends StatelessWidget {
             title: Text('Income'),
             onTap: () {
               Navigator.pop(context); // Close the drawer
-              Navigator.pushNamed(context, '/transactions', arguments: true);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TransactionPageWidget(isIncome: true),
+                ),
+              );
             },
           ),
+
+
           ListTile(
             leading: Icon(Icons.local_drink),
             title: Text('Milk Records'),

@@ -6,7 +6,6 @@ import 'addTransaction.dart';
 import 'transactionFilter.dart';
 import '../home/customDrawer.dart';
 import '../home/customeAppBar.dart';
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -20,7 +19,7 @@ class TransactionPageWidget extends StatefulWidget {
 }
 
 class _TransactionPageWidgetState extends State<TransactionPageWidget> {
-  late Future<List<Expense>> _expensesFuture;
+  late Future<List<Transaction>> _transactionsFuture;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   FilterModel? activeFilters;
   Map<String, Color> _categoryColors = {};
@@ -39,22 +38,25 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
   @override
   void initState() {
     super.initState();
-    _fetchExpenses();
+    _fetchTransactions();
   }
 
-  void _fetchExpenses([FilterModel? filters]) {
+  void _fetchTransactions([FilterModel? filters]) {
     setState(() {
-      _expensesFuture = fetchExpenses(filters);
+      _transactionsFuture = fetchTransactions(filters);
       activeFilters = filters;
     });
   }
 
-  Future<List<Expense>> fetchExpenses([FilterModel? filters]) async {
+  Future<List<Transaction>> fetchTransactions([FilterModel? filters]) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
+    final url = widget.isIncome
+        ? 'http://192.168.8.153/erp/api/income/'
+        : 'http://192.168.8.153/erp/api/expenses/';
 
     final response = await http.get(
-      Uri.parse('http://192.168.8.153/erp/api/expenses/'),
+      Uri.parse(url),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Token $token",
@@ -62,35 +64,35 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
     );
 
     if (response.statusCode == 200) {
-      List<dynamic> expensesJson = json.decode(response.body) as List;
-      List<Expense> expenses = expensesJson.map((json) => Expense.fromJson(json)).toList();
+      List<dynamic> transactionsJson = json.decode(response.body) as List;
+      List<Transaction> transactions = transactionsJson.map((json) => Transaction.fromJson(json)).toList();
 
       if (filters != null) {
-        expenses = _applyFilters(expenses, filters);
+        transactions = _applyFilters(transactions, filters);
       }
 
       // Assign colors dynamically to categories
-      expenses.forEach((expense) {
-        if (!_categoryColors.containsKey(expense.category)) {
-          _categoryColors[expense.category] = _getNextColor();
+      transactions.forEach((transaction) {
+        if (!_categoryColors.containsKey(transaction.category)) {
+          _categoryColors[transaction.category] = _getNextColor();
         }
       });
 
-      return expenses;
+      return transactions;
     } else {
-      print('Failed to load expenses with status code: ${response.statusCode}');
-      throw Exception('Failed to load expenses with status code: ${response.statusCode}');
+      print('Failed to load transactions with status code: ${response.statusCode}');
+      throw Exception('Failed to load transactions with status code: ${response.statusCode}');
     }
   }
 
-  List<Expense> _applyFilters(List<Expense> expenses, FilterModel filters) {
+  List<Transaction> _applyFilters(List<Transaction> transactions, FilterModel filters) {
     if (filters.type != 'All') {
-      expenses = expenses.where((expense) => expense.category == filters.type).toList();
+      transactions = transactions.where((transaction) => transaction.category == filters.type).toList();
     }
     if (filters.category != 'All') {
-      expenses = expenses.where((expense) => expense.category == filters.category).toList();
+      transactions = transactions.where((transaction) => transaction.category == filters.category).toList();
     }
-    expenses = expenses.where((expense) => expense.amount >= filters.amountRange.start && expense.amount <= filters.amountRange.end).toList();
+    transactions = transactions.where((transaction) => transaction.amount >= filters.amountRange.start && transaction.amount <= filters.amountRange.end).toList();
     if (filters.dateFilter != 'All') {
       DateTime now = DateTime.now();
       DateTime startDate;
@@ -124,10 +126,10 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
           startDate = DateTime(2000);
           endDate = DateTime(2101);
       }
-      expenses = expenses.where((expense) => expense.date.isAfter(startDate) && expense.date.isBefore(endDate)).toList();
+      transactions = transactions.where((transaction) => transaction.date.isAfter(startDate) && transaction.date.isBefore(endDate)).toList();
     }
 
-    return expenses;
+    return transactions;
   }
 
   Color _getNextColor() {
@@ -137,7 +139,7 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
   }
 
   void _clearFilters() {
-    _fetchExpenses();
+    _fetchTransactions();
   }
 
   @override
@@ -192,7 +194,7 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
                             ),
                           );
                           if (filters != null) {
-                            _fetchExpenses(filters);
+                            _fetchTransactions(filters);
                           }
                         },
                         child: Text('Filters'),
@@ -210,29 +212,29 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
                 ),
               ),
               Expanded(
-                child: FutureBuilder<List<Expense>>(
-                  future: _expensesFuture,
+                child: FutureBuilder<List<Transaction>>(
+                  future: _transactionsFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return Center(child: Text('Failed to load expenses: ${snapshot.error}'));
+                      return Center(child: Text('Failed to load transactions: ${snapshot.error}'));
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Center(child: Text('No expenses found.'));
+                      return Center(child: Text('No transactions found.'));
                     } else {
-                      final expenses = snapshot.data!;
+                      final transactions = snapshot.data!;
                       return ListView.builder(
-                        itemCount: expenses.length,
+                        itemCount: transactions.length,
                         itemBuilder: (context, index) {
-                          final expense = expenses[index];
+                          final transaction = transactions[index];
                           return Column(
                             children: [
                               _buildTransactionItem(
                                 context,
-                                expense.category,
-                                DateFormat('yyyy-MM-dd').format(expense.date),
-                                'Rs. ${expense.amount}',
-                                expense.description,
+                                transaction.category,
+                                DateFormat('yyyy-MM-dd').format(transaction.date),
+                                'Rs. ${transaction.amount}',
+                                transaction.description,
                               ),
                               Divider(),
                             ],

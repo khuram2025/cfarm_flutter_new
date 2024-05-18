@@ -25,6 +25,33 @@ class Expense {
     );
   }
 }
+
+class Transaction {
+  final int id;
+  final DateTime date;
+  final double amount;
+  final String category;
+  final String description;
+
+  Transaction({
+    required this.id,
+    required this.date,
+    required this.amount,
+    required this.category,
+    required this.description,
+  });
+
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    return Transaction(
+      id: json['id'],
+      date: DateTime.parse(json['date']),
+      amount: double.parse(json['amount']),
+      category: json['category'],
+      description: json['description'] ?? '',
+    );
+  }
+}
+
 // filter_model.dart
 class FilterModel {
   final String type;
