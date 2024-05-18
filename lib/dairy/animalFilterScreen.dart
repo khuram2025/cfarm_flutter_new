@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-final String baseUrl = "http://farmapp.channab.com";
+final String baseUrl = "http://192.168.8.153";
 
 class AnimalFilterPage extends StatefulWidget {
   final Function(Map<String, dynamic>) onApplyFilter;

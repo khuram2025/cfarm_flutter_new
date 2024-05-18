@@ -9,7 +9,7 @@ Future<List<Expense>> fetchExpenses() async {
   String? token = prefs.getString('auth_token');
 
   final response = await http.get(
-    Uri.parse('http://farmapp.channab.com/erp/api/expenses/'),
+    Uri.parse('http://192.168.8.153/erp/api/expenses/'),
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Token $token",
@@ -31,7 +31,7 @@ Future<List<String>> fetchCategories() async {
   String? token = prefs.getString('auth_token');
 
   final response = await http.get(
-    Uri.parse('http://farmapp.channab.com/erp/api/expenses/categories/'),
+    Uri.parse('http://192.168.8.153/erp/api/expenses/categories/'),
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Token $token",
@@ -50,5 +50,28 @@ Future<List<String>> fetchCategories() async {
     throw Exception('Failed to load categories');
   }
 }
+
+
+Future<List<String>> fetchIncomeCategories() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('auth_token');
+
+  final response = await http.get(
+    Uri.parse('http://192.168.8.153/erp/api/income/categories/'),
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Token $token",
+    },
+  );
+
+  if (response.statusCode == 200) {
+    List<dynamic> categoriesJson = json.decode(response.body) as List;
+    List<String> categories = categoriesJson.map((json) => json['name'] as String).toList();
+    return categories;
+  } else {
+    throw Exception('Failed to load categories');
+  }
+}
+
 
 

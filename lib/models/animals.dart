@@ -1,5 +1,5 @@
 // Animal model
-const String baseUrl = 'http://farmapp.channab.com';
+const String baseUrl = 'http://192.168.8.153';
 
 class Animal {
   final int id;

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/expense.dart';
-
 import 'addTransaction.dart';
 import 'transactionFilter.dart';
 import '../home/customDrawer.dart';
@@ -24,6 +23,18 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
   late Future<List<Expense>> _expensesFuture;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   FilterModel? activeFilters;
+  Map<String, Color> _categoryColors = {};
+  final List<Color> _availableColors = [
+    Color(0xFF0DA487),
+    Colors.blue,
+    Colors.orange,
+    Colors.purple,
+    Colors.teal,
+    Colors.red,
+    Colors.brown,
+    Colors.cyan,
+  ];
+  int _colorIndex = 0;
 
   @override
   void initState() {
@@ -43,7 +54,7 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
     String? token = prefs.getString('auth_token');
 
     final response = await http.get(
-      Uri.parse('http://farmapp.channab.com/erp/api/expenses/'),
+      Uri.parse('http://192.168.8.153/erp/api/expenses/'),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Token $token",
@@ -57,6 +68,13 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
       if (filters != null) {
         expenses = _applyFilters(expenses, filters);
       }
+
+      // Assign colors dynamically to categories
+      expenses.forEach((expense) {
+        if (!_categoryColors.containsKey(expense.category)) {
+          _categoryColors[expense.category] = _getNextColor();
+        }
+      });
 
       return expenses;
     } else {
@@ -112,6 +130,12 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
     return expenses;
   }
 
+  Color _getNextColor() {
+    Color color = _availableColors[_colorIndex % _availableColors.length];
+    _colorIndex++;
+    return color;
+  }
+
   void _clearFilters() {
     _fetchExpenses();
   }
@@ -147,67 +171,39 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => AddTransactionPageWidget(isIncome: widget.isIncome),
-                                ),
-                              );
-                            },
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AddTransactionPageWidget(isIncome: widget.isIncome),
-                                  ),
-                                );
-                              },
-                              child: Text(widget.isIncome ? 'Add Income' : 'Add Expense'),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AddTransactionPageWidget(isIncome: widget.isIncome),
                             ),
-                          ),
-                          const SizedBox(width: 10),
-                          InkWell(
-                            onTap: () async {
-                              final filters = await Navigator.push<FilterModel>(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => FilterPageWidget(),
-                                ),
-                              );
-                              if (filters != null) {
-                                _fetchExpenses(filters);
-                              }
-                            },
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                final filters = await Navigator.push<FilterModel>(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => FilterPageWidget(),
-                                  ),
-                                );
-                                if (filters != null) {
-                                  _fetchExpenses(filters);
-                                }
-                              },
-                              child: Text('Filters'),
+                          );
+                        },
+                        child: Text(widget.isIncome ? 'Add Income' : 'Add Expense'),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final filters = await Navigator.push<FilterModel>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FilterPageWidget(),
                             ),
-                          ),
-                          const SizedBox(width: 10),
-                          ElevatedButton(
-                            onPressed: activeFilters != null ? _clearFilters : null,
-                            child: Text('Clear Filters'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: activeFilters != null ? Theme.of(context).primaryColor : Colors.grey,
-                            ),
-                          ),
-                        ],
+                          );
+                          if (filters != null) {
+                            _fetchExpenses(filters);
+                          }
+                        },
+                        child: Text('Filters'),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: activeFilters != null ? _clearFilters : null,
+                        child: Text('Clear Filters'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: activeFilters != null ? Theme.of(context).primaryColor : Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -238,7 +234,7 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
                                 'Rs. ${expense.amount}',
                                 expense.description,
                               ),
-                              const Divider(),
+                              Divider(),
                             ],
                           );
                         },
@@ -255,61 +251,138 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
   }
 
   Widget _buildTransactionItem(BuildContext context, String category, String date, String amount, String description) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        Color categoryColor = _categoryColors[category] ?? Colors.grey;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                category,
-                style: Theme.of(context).textTheme.subtitle1,
-              ),
-              Text(
-                date,
-                style: Theme.of(context).textTheme.caption,
-              ),
-              Text(
-                description,
-                style: Theme.of(context).textTheme.bodyText2,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    date,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    amount,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: categoryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Center(
+                      child: Text(
+                        category,
+                        style: TextStyle(color: categoryColor, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Dialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: Container(
+                              padding: EdgeInsets.all(20),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Transaction Details',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.close),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  Divider(),
+                                  Text(
+                                    'Category: $category',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Date: $date',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Amount: $amount',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(height: 8),
+                                  if (description.isNotEmpty)
+                                    Text(
+                                      'Description: $description',
+                                      style: TextStyle(color: Colors.grey[600]),
+                                    ),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Options: ',
+                                        style: TextStyle(color: Colors.grey[600]),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          // Handle Edit click
+                                        },
+                                        child: Text(
+                                          'Edit',
+                                          style: TextStyle(color: Colors.blue),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          // Handle Delete click
+                                        },
+                                        child: Text(
+                                          'Delete',
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: Text(
+                      'Details',
+                      style: TextStyle(color: Color(0xFF0DA487)),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          Row(
-            children: [
-              Icon(
-                widget.isIncome ? Icons.arrow_downward : Icons.arrow_upward,
-                color: widget.isIncome ? Color(0xFF0DA487) : Color(0xFFEE8B60),
-                size: 24,
-              ),
-              Text(
-                amount,
-                style: Theme.of(context).textTheme.bodyText1?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: widget.isIncome ? Color(0xFF0DA487) : Color(0xFFEE8B60),
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Icon(
-                Icons.edit,
-                color: Theme.of(context).primaryColor,
-                size: 24,
-              ),
-              const SizedBox(width: 10),
-              Icon(
-                Icons.delete_sharp,
-                color: Theme.of(context).errorColor,
-                size: 24,
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'Finance/addExpense.dart';
+import 'Finance/amountentry.dart';
+import 'Finance/confirmation.dart';
 import 'Finance/incomeScreen.dart';
 import 'Finance/transactionFilter.dart';
+import 'Finance/transactionList.dart';
 import 'Finance/transactionsScreen.dart';
 import 'accounts/login.dart';
 import 'Finance/addTransaction.dart'; // Import AddTransactionPageWidget
@@ -31,6 +35,13 @@ class MyApp extends StatelessWidget {
         '/transactions': (context) => TransactionPageWidget(isIncome: false),
         '/filter': (context) => FilterPageWidget(),
         '/animals': (context) => AnimalListMobilePage(),
+        '/amount-entry': (context) => AmountEntryScreen(),
+        '/success': (context) => SuccessScreen(),
+        '/erp': (context) => ExpenseEntryScreen(),
+        '/list': (context) => TransactionListScreen(isIncome: false,),
+
+
+
         // '/income': (context) => IncomeScreen(),
       },
     );

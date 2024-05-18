@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// models/expense.dart
 class Expense {
   final int id;
   final DateTime date;
@@ -17,17 +16,15 @@ class Expense {
   });
 
   factory Expense.fromJson(Map<String, dynamic> json) {
-    // print("Parsing expense: $json"); // Print the received JSON data
     return Expense(
       id: json['id'],
       date: DateTime.parse(json['date']),
       amount: double.parse(json['amount']),
       category: json['category'],
-      description: json['description'],
+      description: json['description'] ?? '',
     );
   }
 }
-
 // filter_model.dart
 class FilterModel {
   final String type;

@@ -55,6 +55,35 @@ class CustomDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/milk-records');
             },
           ),
+          ListTile(
+            leading: Icon(Icons.local_drink),
+            title: Text('Add Expense'),
+            onTap: () {
+              Navigator.pushNamed(context, '/amount-entry');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.local_drink),
+            title: Text('ERP'),
+            onTap: () {
+              Navigator.pushNamed(context, '/erp');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.local_drink),
+            title: Text('Success'),
+            onTap: () {
+              Navigator.pushNamed(context, '/success');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.local_drink),
+            title: Text('Transaction List'),
+            onTap: () {
+              Navigator.pushNamed(context, '/list');
+            },
+          ),
+
         ],
       ),
     );
