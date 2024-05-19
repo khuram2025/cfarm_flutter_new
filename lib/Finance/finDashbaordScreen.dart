@@ -4,6 +4,10 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:untitled3/Finance/transactionsScreen.dart';
+
+import '../models/expense.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -25,6 +29,7 @@ class AnalyticsScreen extends StatefulWidget {
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
   final Color primaryColor = Color(0xFF0DA487);
+  late Future<List<SummaryData>> _summaryDataFuture;
   late Future<List<Transaction>> _transactionsFuture;
   DateTime _selectedDate = DateTime(2024, 5);
   Map<String, Color> _categoryColors = {};
@@ -40,10 +45,33 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   ];
   int _colorIndex = 0;
 
+  double totalIncome = 0;
+  double totalExpense = 0;
+
   @override
   void initState() {
     super.initState();
+    _fetchSummaryData();
     _fetchTransactions();
+  }
+
+  void _fetchSummaryData() {
+    setState(() {
+      _summaryDataFuture = fetchSummaryData();
+      _summaryDataFuture.then((data) {
+        DateTime now = DateTime.now();
+        String currentMonth = DateFormat('MMM yyyy').format(now);
+        for (var summary in data) {
+          if (summary.month == currentMonth) {
+            setState(() {
+              totalIncome = summary.totalIncome;
+              totalExpense = summary.totalExpense;
+            });
+            break;
+          }
+        }
+      });
+    });
   }
 
   void _fetchTransactions() {
@@ -52,12 +80,34 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     });
   }
 
+  Future<List<SummaryData>> fetchSummaryData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('auth_token');
+
+    final url = 'http://192.168.8.153/erp/api/income-expense-summary/';
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Token $token",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> summaryJson = json.decode(response.body) as List;
+      return summaryJson.map((json) => SummaryData.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load summary data');
+    }
+  }
+
   Future<List<Transaction>> fetchTransactions() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
 
-    final incomeUrl = 'http://farmapp.channab.com/erp/api/income/';
-    final expensesUrl = 'http://farmapp.channab.com/erp/api/expenses/';
+    final incomeUrl = 'http://192.168.8.153/erp/api/income/';
+    final expensesUrl = 'http://192.168.8.153/erp/api/expenses/';
 
     final incomeResponse = await http.get(
       Uri.parse(incomeUrl),
@@ -123,6 +173,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
+        _fetchSummaryData();
         _fetchTransactions();
       });
     }
@@ -161,47 +212,67 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             Row(
               children: [
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.green[100],
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Income',
-                          style: TextStyle(color: Colors.green, fontSize: 16),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TransactionPageWidget(isIncome: true),
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          '\$6,000',
-                          style: TextStyle(color: Colors.green, fontSize: 24, fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.green[100],
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Income',
+                            style: TextStyle(color: Colors.green, fontSize: 18),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            '\$${totalIncome.toStringAsFixed(2)}',
+                            style: TextStyle(color: Colors.green, fontSize: 26, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 SizedBox(width: 16),
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.red[100],
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Expenses',
-                          style: TextStyle(color: Colors.red, fontSize: 16),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TransactionPageWidget(isIncome: false),
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          '\$2,000',
-                          style: TextStyle(color: Colors.red, fontSize: 24, fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.red[100],
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Expenses',
+                            style: TextStyle(color: Colors.red, fontSize: 18),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            '\$${totalExpense.toStringAsFixed(2)}',
+                            style: TextStyle(color: Colors.red, fontSize: 26, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -219,29 +290,46 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 children: [
                   Text(
                     'Comparison Chart',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
                   Container(
                     height: 200,
-                    child: SfCartesianChart(
-                      primaryXAxis: CategoryAxis(),
-                      series: <CartesianSeries>[
-                        LineSeries<SalesData, String>(
-                          color: Colors.green,
-                          dataSource: getChartData(),
-                          xValueMapper: (SalesData sales, _) => sales.month,
-                          yValueMapper: (SalesData sales, _) => sales.income,
-                          name: 'Income',
-                        ),
-                        LineSeries<SalesData, String>(
-                          color: Colors.red,
-                          dataSource: getChartData(),
-                          xValueMapper: (SalesData sales, _) => sales.month,
-                          yValueMapper: (SalesData sales, _) => sales.expense,
-                          name: 'Expenses',
-                        ),
-                      ],
+                    child: FutureBuilder<List<SummaryData>>(
+                      future: _summaryDataFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(child: Text('Failed to load summary data: ${snapshot.error}'));
+                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return Center(child: Text('No data available.'));
+                        } else {
+                          final summaryData = snapshot.data!;
+                          return SfCartesianChart(
+                            primaryXAxis: CategoryAxis(),
+                            primaryYAxis: NumericAxis(
+                              numberFormat: NumberFormat.compact(),
+                            ),
+                            series: <CartesianSeries>[
+                              ColumnSeries<SummaryData, String>(
+                                color: Colors.green,
+                                dataSource: summaryData,
+                                xValueMapper: (SummaryData data, _) => data.month,
+                                yValueMapper: (SummaryData data, _) => data.totalIncome,
+                                name: 'Income',
+                              ),
+                              ColumnSeries<SummaryData, String>(
+                                color: Colors.red,
+                                dataSource: summaryData,
+                                xValueMapper: (SummaryData data, _) => data.month,
+                                yValueMapper: (SummaryData data, _) => data.totalExpense,
+                                name: 'Expenses',
+                              ),
+                            ],
+                          );
+                        }
+                      },
                     ),
                   ),
                 ],
@@ -260,20 +348,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     return Center(child: Text('No transactions found.'));
                   } else {
                     final transactions = snapshot.data!;
+                    final categories = _getCategoryTotals(transactions);
                     return ListView.builder(
-                      itemCount: transactions.length,
+                      itemCount: categories.length,
                       itemBuilder: (context, index) {
-                        final transaction = transactions[index];
+                        final category = categories[index];
                         return Column(
                           children: [
-                            _buildTransactionItem(
+                            _buildCategoryItem(
                               context,
-                              transaction.category,
-                              DateFormat('yyyy-MM-dd').format(transaction.date),
-                              'Rs. ${transaction.amount}',
-                              transaction.description,
+                              category['category']!,
+                              'Rs. ${category['total']}',
+                              category['isIncome'] == 'true',
                             ),
-                            Divider(),
+                            Divider(thickness: 1, color: Colors.grey[300]),
                           ],
                         );
                       },
@@ -288,144 +376,49 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  List<SalesData> getChartData() {
-    return [
-      SalesData('Jan', 400, 300),
-      SalesData('Feb', 500, 400),
-      SalesData('Mar', 600, 200),
-      SalesData('Apr', 700, 600),
-      SalesData('May', 400, 300),
-      SalesData('Jun', 500, 400),
-      SalesData('Jul', 600, 200),
-    ];
+  List<Map<String, String>> _getCategoryTotals(List<Transaction> transactions) {
+    Map<String, double> categoryTotals = {};
+    Map<String, bool> categoryTypes = {};
+
+    for (var transaction in transactions) {
+      if (!categoryTotals.containsKey(transaction.category)) {
+        categoryTotals[transaction.category] = 0;
+        categoryTypes[transaction.category] = transaction.category.contains('Income');
+      }
+      categoryTotals[transaction.category] = categoryTotals[transaction.category]! + transaction.amount;
+    }
+
+    return categoryTotals.entries
+        .map((entry) => {
+      'category': entry.key,
+      'total': entry.value.toString(),
+      'isIncome': categoryTypes[entry.key].toString(),
+    })
+        .toList();
   }
 
-  Widget _buildTransactionItem(BuildContext context, String category, String date, String amount, String description) {
-    Color categoryColor = _categoryColors[category] ?? Colors.grey;
+  Widget _buildCategoryItem(BuildContext context, String category, String total, bool isIncome) {
+    Color categoryColor = isIncome ? Colors.green : Colors.red;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                date,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                amount,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: categoryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Center(
-                  child: Text(
-                    category,
-                    style: TextStyle(color: categoryColor, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return Dialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        child: Container(
-                          padding: EdgeInsets.all(20),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Transaction Details',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.close),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              ),
-                              Divider(),
-                              Text(
-                                'Category: $category',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                'Date: $date',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                'Amount: $amount',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(height: 8),
-                              if (description.isNotEmpty)
-                                Text(
-                                  'Description: $description',
-                                  style: TextStyle(color: Colors.grey[600]),
-                                ),
-                              SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Options: ',
-                                    style: TextStyle(color: Colors.grey[600]),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      // Handle Edit click
-                                    },
-                                    child: Text(
-                                      'Edit',
-                                      style: TextStyle(color: Colors.blue),
-                                    ),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      // Handle Delete click
-                                    },
-                                    child: Text(
-                                      'Delete',
-                                      style: TextStyle(color: Colors.red),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-                child: Text(
-                  'Details',
-                  style: TextStyle(color: primaryColor),
-                ),
-              ),
-            ],
+          Container(
+            decoration: BoxDecoration(
+              color: categoryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Text(
+              category,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: categoryColor),
+            ),
+          ),
+          Text(
+            total,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: categoryColor),
           ),
         ],
       ),
@@ -433,35 +426,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   }
 }
 
-class SalesData {
-  SalesData(this.month, this.income, this.expense);
+class SummaryData {
+  SummaryData({required this.month, required this.totalIncome, required this.totalExpense});
+
   final String month;
-  final double income;
-  final double expense;
-}
+  final double totalIncome;
+  final double totalExpense;
 
-class Transaction {
-  final int id;
-  final DateTime date;
-  final double amount;
-  final String category;
-  final String description;
-
-  Transaction({
-    required this.id,
-    required this.date,
-    required this.amount,
-    required this.category,
-    required this.description,
-  });
-
-  factory Transaction.fromJson(Map<String, dynamic> json) {
-    return Transaction(
-      id: json['id'],
-      date: DateTime.parse(json['date']),
-      amount: double.parse(json['amount'].toString()), // Ensure amount is parsed as double
-      category: json['category'],
-      description: json['description'] ?? '',
+  factory SummaryData.fromJson(Map<String, dynamic> json) {
+    return SummaryData(
+      month: json['month'],
+      totalIncome: json['total_income'].toDouble(),
+      totalExpense: json['total_expense'].toDouble(),
     );
   }
 }

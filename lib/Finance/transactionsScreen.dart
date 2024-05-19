@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled3/Finance/addExpense.dart';
+import '../home/finCustomeAppbar.dart';
 import '../models/expense.dart';
 import 'addTransaction.dart';
 import 'transactionFilter.dart';
 import '../home/customDrawer.dart';
-import '../home/customeAppBar.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -24,6 +24,9 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   FilterModel? activeFilters;
   Map<String, Color> _categoryColors = {};
+  DateTime _selectedDate = DateTime.now();
+  String _selectedCategory = 'All';
+  List<String> _categories = ['All'];
   final List<Color> _availableColors = [
     Color(0xFF0DA487),
     Colors.blue,
@@ -53,8 +56,8 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     final url = widget.isIncome
-        ? 'http://farmapp.channab.com/erp/api/income/'
-        : 'http://farmapp.channab.com/erp/api/expenses/';
+        ? 'http://192.168.8.153/erp/api/income/'
+        : 'http://192.168.8.153/erp/api/expenses/';
 
     final response = await http.get(
       Uri.parse(url),
@@ -76,6 +79,9 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
       transactions.forEach((transaction) {
         if (!_categoryColors.containsKey(transaction.category)) {
           _categoryColors[transaction.category] = _getNextColor();
+        }
+        if (!_categories.contains(transaction.category)) {
+          _categories.add(transaction.category);
         }
       });
 
@@ -133,6 +139,13 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
     return transactions;
   }
 
+  List<Transaction> _applyCategoryFilter(List<Transaction> transactions) {
+    if (_selectedCategory != 'All') {
+      transactions = transactions.where((transaction) => transaction.category == _selectedCategory).toList();
+    }
+    return transactions;
+  }
+
   Color _getNextColor() {
     Color color = _availableColors[_colorIndex % _availableColors.length];
     _colorIndex++;
@@ -140,7 +153,54 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
   }
 
   void _clearFilters() {
-    _fetchTransactions();
+    setState(() {
+      _selectedCategory = 'All';
+      _fetchTransactions();
+    });
+  }
+
+  void _handleDateChange(DateTime newDate) {
+    setState(() {
+      _selectedDate = newDate;
+      _fetchTransactions();
+    });
+  }
+
+  void _handleAddTransaction() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TransactionEntryScreen(), // or AddTransactionScreen() for income
+      ),
+    );
+  }
+
+  void _handleFilter() async {
+    final filters = await Navigator.push<FilterModel>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FilterPageWidget(),
+      ),
+    );
+    if (filters != null) {
+      _fetchTransactions(filters);
+    }
+  }
+
+  double _getTotalAmountForCategory(List<String> categories) {
+    double totalAmount = 0;
+    if (_transactionsFuture != null) {
+      _transactionsFuture.then((transactions) {
+        if (transactions != null) {
+          transactions.forEach((transaction) {
+            if (categories.contains(transaction.category) || categories.contains('All')) {
+              totalAmount += transaction.amount;
+            }
+          });
+        }
+      });
+    }
+    return totalAmount;
   }
 
   @override
@@ -152,8 +212,13 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: Theme.of(context).backgroundColor,
-        appBar: CustomAppBar(
-          title: widget.isIncome ? 'Income List' : 'Expense List',
+        appBar: FinCustomAppBar(
+          title: widget.isIncome ? 'Income' : 'Expense',
+          isIncome: widget.isIncome,
+          selectedDate: _selectedDate,
+          onDateChanged: _handleDateChange,
+          onAddTransaction: _handleAddTransaction,
+          onFilter: _handleFilter,
         ),
         drawer: CustomDrawer(),
         body: SafeArea(
@@ -161,56 +226,41 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
-              Container(
-                width: double.infinity,
-                height: 40,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ExpenseEntryScreen(),
+              FutureBuilder<List<Transaction>>(
+                future: _transactionsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Failed to load transactions: ${snapshot.error}'));
+                  } else {
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _categories.map((category) {
+                          double totalAmount = _getTotalAmountForCategory([category]);
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: ChoiceChip(
+                              label: Text(
+                                category == 'All'
+                                    ? 'All (Rs. ${_getTotalAmountForCategory(_categories).toStringAsFixed(2)})'
+                                    : '$category (Rs. ${totalAmount.toStringAsFixed(2)})',
+                              ),
+                              selected: _selectedCategory == category,
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  _selectedCategory = selected ? category : 'All';
+                                  _fetchTransactions();
+                                });
+                              },
                             ),
                           );
-                        },
-                        child: Text(widget.isIncome ? 'Add Income' : 'Add Expense'),
+                        }).toList(),
                       ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () async {
-                          final filters = await Navigator.push<FilterModel>(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FilterPageWidget(),
-                            ),
-                          );
-                          if (filters != null) {
-                            _fetchTransactions(filters);
-                          }
-                        },
-                        child: Text('Filters'),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: activeFilters != null ? _clearFilters : null,
-                        child: Text('Clear Filters'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: activeFilters != null ? Theme.of(context).primaryColor : Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    );
+                  }
+                },
               ),
               Expanded(
                 child: FutureBuilder<List<Transaction>>(
@@ -223,7 +273,7 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return Center(child: Text('No transactions found.'));
                     } else {
-                      final transactions = snapshot.data!;
+                      final transactions = _applyCategoryFilter(snapshot.data!);
                       return ListView.builder(
                         itemCount: transactions.length,
                         itemBuilder: (context, index) {
@@ -341,33 +391,6 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
                                       'Description: $description',
                                       style: TextStyle(color: Colors.grey[600]),
                                     ),
-                                  SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Options: ',
-                                        style: TextStyle(color: Colors.grey[600]),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          // Handle Edit click
-                                        },
-                                        child: Text(
-                                          'Edit',
-                                          style: TextStyle(color: Colors.blue),
-                                        ),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          // Handle Delete click
-                                        },
-                                        child: Text(
-                                          'Delete',
-                                          style: TextStyle(color: Colors.red),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
                                 ],
                               ),
                             ),

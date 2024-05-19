@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import '../models/expense.dart';
 import '../services/api_service.dart';
 
-
 class FilterPageWidget extends StatefulWidget {
   const FilterPageWidget({Key? key}) : super(key: key);
 
@@ -87,7 +86,12 @@ class _FilterPageWidgetState extends State<FilterPageWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Filter Transactions'),
+        title: Text(
+          'Filter Transactions',
+          style: TextStyle(color: Color(0xFF0DA487)),
+        ),
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Color(0xFF0DA487)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -98,12 +102,18 @@ class _FilterPageWidgetState extends State<FilterPageWidget> {
               value: _selectedType,
               decoration: InputDecoration(
                 labelText: 'Filter by Type',
-                border: OutlineInputBorder(),
+                labelStyle: TextStyle(color: Color(0xFF0DA487)),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF0DA487)),
+                ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF0DA487)),
+                ),
               ),
               items: ['All', 'Income', 'Expense'].map((String type) {
                 return DropdownMenuItem(
                   value: type,
-                  child: Text(type),
+                  child: Text(type, style: TextStyle(color: Color(0xFF0DA487))),
                 );
               }).toList(),
               onChanged: (newValue) {
@@ -118,12 +128,18 @@ class _FilterPageWidgetState extends State<FilterPageWidget> {
               value: _selectedCategory,
               decoration: InputDecoration(
                 labelText: 'Filter by Category',
-                border: OutlineInputBorder(),
+                labelStyle: TextStyle(color: Color(0xFF0DA487)),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF0DA487)),
+                ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF0DA487)),
+                ),
               ),
               items: _categories.map((String category) {
                 return DropdownMenuItem(
                   value: category,
-                  child: Text(category),
+                  child: Text(category, style: TextStyle(color: Color(0xFF0DA487))),
                 );
               }).toList(),
               onChanged: (newValue) {
@@ -137,13 +153,21 @@ class _FilterPageWidgetState extends State<FilterPageWidget> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Filter by Amount Range'),
+                Text(
+                  'Filter by Amount Range',
+                  style: TextStyle(color: Color(0xFF0DA487)),
+                ),
                 RangeSlider(
                   values: _amountRange,
                   min: 0,
                   max: 10000,
                   divisions: 100,
-                  labels: RangeLabels('${_amountRange.start.round()}', '${_amountRange.end.round()}'),
+                  activeColor: Color(0xFF0DA487),
+                  inactiveColor: Color(0xFF0DA487).withOpacity(0.3),
+                  labels: RangeLabels(
+                    '${_amountRange.start.round()}',
+                    '${_amountRange.end.round()}',
+                  ),
                   onChanged: (RangeValues values) {
                     setState(() {
                       _amountRange = values;
@@ -158,12 +182,18 @@ class _FilterPageWidgetState extends State<FilterPageWidget> {
               value: _selectedDateFilter,
               decoration: InputDecoration(
                 labelText: 'Filter by Date',
-                border: OutlineInputBorder(),
+                labelStyle: TextStyle(color: Color(0xFF0DA487)),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF0DA487)),
+                ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF0DA487)),
+                ),
               ),
               items: _dateFilters.map((String filter) {
                 return DropdownMenuItem(
                   value: filter,
-                  child: Text(filter),
+                  child: Text(filter, style: TextStyle(color: Color(0xFF0DA487))),
                 );
               }).toList(),
               onChanged: (newValue) async {
@@ -180,7 +210,10 @@ class _FilterPageWidgetState extends State<FilterPageWidget> {
             if (_selectedDateFilter == 'Custom Date Range' && _customDateRange != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
-                child: Text('From: ${DateFormat('yyyy-MM-dd').format(_customDateRange!.start)} To: ${DateFormat('yyyy-MM-dd').format(_customDateRange!.end)}'),
+                child: Text(
+                  'From: ${DateFormat('yyyy-MM-dd').format(_customDateRange!.start)} To: ${DateFormat('yyyy-MM-dd').format(_customDateRange!.end)}',
+                  style: TextStyle(color: Color(0xFF0DA487)),
+                ),
               ),
             SizedBox(height: 16),
             // Apply and Reset Buttons
@@ -189,11 +222,17 @@ class _FilterPageWidgetState extends State<FilterPageWidget> {
               children: [
                 ElevatedButton(
                   onPressed: _applyFilters,
-                  child: Text('Apply'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF0DA487),
+                  ),
+                  child: Text('Apply', style: TextStyle(color: Colors.white)),
                 ),
                 ElevatedButton(
                   onPressed: _resetFilters,
-                  child: Text('Reset'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF0DA487),
+                  ),
+                  child: Text('Reset', style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),

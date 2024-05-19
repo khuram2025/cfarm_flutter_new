@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
         '/animals': (context) => AnimalListMobilePage(),
         '/amount-entry': (context) => AmountEntryScreen(),
         '/success': (context) => SuccessScreen(),
-        '/erp': (context) => ExpenseEntryScreen(),
+        '/erp': (context) => TransactionEntryScreen(),
         '/findashboard': (context) => AnalyticsScreen(),
 
 

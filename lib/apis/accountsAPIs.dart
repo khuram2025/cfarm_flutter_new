@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'models.dart';
 
 class ApiService {
-  final String baseUrl = "http://farmapp.channab.com";
+  final String baseUrl = "http://192.168.8.153";
 
   Future<Map<String, dynamic>?> loginUser(String mobileNumber, String password) async {
     final response = await http.post(
@@ -35,7 +35,7 @@ class ApiService {
     String? token = prefs.getString('auth_token');
 
     final response = await http.get(
-      Uri.parse('http://farmapp.channab.com/dairy/api/animals/'),
+      Uri.parse('http://192.168.8.153/dairy/api/animals/'),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Token $token",
@@ -56,7 +56,7 @@ class ApiService {
     String? token = prefs.getString('auth_token');
 
     final response = await http.get(
-      Uri.parse('http://farmapp.channab.com/dairy/api/expenses/'),
+      Uri.parse('http://192.168.8.153/dairy/api/expenses/'),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Token $token",
