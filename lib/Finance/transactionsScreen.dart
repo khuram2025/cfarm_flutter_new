@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled3/Finance/addExpense.dart';
 import '../models/expense.dart';
 import 'addTransaction.dart';
 import 'transactionFilter.dart';
@@ -52,8 +53,8 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     final url = widget.isIncome
-        ? 'http://192.168.8.153/erp/api/income/'
-        : 'http://192.168.8.153/erp/api/expenses/';
+        ? 'http://farmapp.channab.com/erp/api/income/'
+        : 'http://farmapp.channab.com/erp/api/expenses/';
 
     final response = await http.get(
       Uri.parse(url),
@@ -178,7 +179,7 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => AddTransactionPageWidget(isIncome: widget.isIncome),
+                              builder: (context) => ExpenseEntryScreen(),
                             ),
                           );
                         },

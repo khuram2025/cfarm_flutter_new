@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'Finance/addExpense.dart';
 import 'Finance/amountentry.dart';
 import 'Finance/confirmation.dart';
+import 'Finance/finDashbaordScreen.dart';
 import 'Finance/incomeScreen.dart';
 import 'Finance/transactionFilter.dart';
 import 'Finance/transactionList.dart';
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
         '/amount-entry': (context) => AmountEntryScreen(),
         '/success': (context) => SuccessScreen(),
         '/erp': (context) => ExpenseEntryScreen(),
-        '/list': (context) => TransactionListScreen(isIncome: false,),
+        '/findashboard': (context) => AnalyticsScreen(),
 
 
 
