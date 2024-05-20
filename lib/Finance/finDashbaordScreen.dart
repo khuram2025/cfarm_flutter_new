@@ -33,16 +33,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   late Future<List<Transaction>> _transactionsFuture;
   DateTime _selectedDate = DateTime(2024, 5);
   Map<String, Color> _categoryColors = {};
-  final List<Color> _availableColors = [
-    Color(0xFF0DA487),
-    Colors.blue,
-    Colors.orange,
-    Colors.purple,
-    Colors.teal,
-    Colors.red,
-    Colors.brown,
-    Colors.cyan,
-  ];
+
   int _colorIndex = 0;
 
   double totalIncome = 0;
@@ -143,12 +134,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       // Sort transactions by date
       allTransactions.sort((a, b) => b.date.compareTo(a.date));
 
-      // Assign colors dynamically to categories
-      allTransactions.forEach((transaction) {
-        if (!_categoryColors.containsKey(transaction.category)) {
-          _categoryColors[transaction.category] = _getNextColor();
-        }
-      });
+
 
       return allTransactions.take(10).toList();
     } else {
@@ -156,11 +142,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     }
   }
 
-  Color _getNextColor() {
-    Color color = _availableColors[_colorIndex % _availableColors.length];
-    _colorIndex++;
-    return color;
-  }
+
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -398,7 +380,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   }
 
   Widget _buildCategoryItem(BuildContext context, String category, String total, bool isIncome) {
-    Color categoryColor = isIncome ? Colors.green : Colors.red;
+    Color categoryColor = isIncome ? Color(0xFF0DA487) : Colors.red;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

@@ -1,12 +1,14 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled3/Finance/addSalaryTransaction.dart';
 
 import '../services/api_service.dart';
+
 
 void main() {
   runApp(MaterialApp(
@@ -133,7 +135,6 @@ class _TransactionEntryScreenState extends State<TransactionEntryScreen> with Si
     }
   }
 
-
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -158,7 +159,7 @@ class _TransactionEntryScreenState extends State<TransactionEntryScreen> with Si
                 ),
                 SizedBox(height: 10),
                 Text(
-                  "Your expense has been created successfully.",
+                  "Your transaction has been created successfully.",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.grey,
@@ -221,7 +222,9 @@ class _TransactionEntryScreenState extends State<TransactionEntryScreen> with Si
         actions: [
           IconButton(
             icon: Icon(Icons.close, color: Colors.white),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
           ),
         ],
         bottom: PreferredSize(
@@ -248,7 +251,27 @@ class _TransactionEntryScreenState extends State<TransactionEntryScreen> with Si
         children: [
           _buildForm('expense'),
           _buildForm('income'),
-          _buildForm('salary'),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddSalaryTransactionScreen()),
+              );
+            },
+            child: Container(
+              color: Colors.white,
+              child: Center(
+                child: Text(
+                  'Add Salary Transaction',
+                  style: TextStyle(
+                    color: Color(0xFF0DA487),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

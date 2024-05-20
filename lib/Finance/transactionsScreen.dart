@@ -187,19 +187,13 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
     }
   }
 
-  double _getTotalAmountForCategory(List<String> categories) {
+  double _getTotalAmountForCategory(List<Transaction> transactions, String category) {
     double totalAmount = 0;
-    if (_transactionsFuture != null) {
-      _transactionsFuture.then((transactions) {
-        if (transactions != null) {
-          transactions.forEach((transaction) {
-            if (categories.contains(transaction.category) || categories.contains('All')) {
-              totalAmount += transaction.amount;
-            }
-          });
-        }
-      });
-    }
+    transactions.forEach((transaction) {
+      if (category == 'All' || transaction.category == category) {
+        totalAmount += transaction.amount;
+      }
+    });
     return totalAmount;
   }
 
@@ -233,21 +227,29 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
                     return Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Failed to load transactions: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No transactions found.'));
                   } else {
+                    final transactions = snapshot.data!;
                     return SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: _categories.map((category) {
-                          double totalAmount = _getTotalAmountForCategory([category]);
+                          double totalAmount = _getTotalAmountForCategory(transactions, category);
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4),
                             child: ChoiceChip(
                               label: Text(
                                 category == 'All'
-                                    ? 'All (Rs. ${_getTotalAmountForCategory(_categories).toStringAsFixed(2)})'
+                                    ? 'All (Rs. ${_getTotalAmountForCategory(transactions, 'All').toStringAsFixed(2)})'
                                     : '$category (Rs. ${totalAmount.toStringAsFixed(2)})',
                               ),
                               selected: _selectedCategory == category,
+                              selectedColor: Color(0xFF0DA487).withOpacity(0.1),
+                              backgroundColor: Colors.white,
+                              labelStyle: TextStyle(
+                                color: _selectedCategory == category ? Color(0xFF0DA487) : Colors.black,
+                              ),
                               onSelected: (bool selected) {
                                 setState(() {
                                   _selectedCategory = selected ? category : 'All';
