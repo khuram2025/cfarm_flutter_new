@@ -1,9 +1,6 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,16 +14,15 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
   TextEditingController _amountController = TextEditingController();
   TextEditingController _noteController = TextEditingController();
   String? _selectedEmployee;
-  String? _selectedComponent;
-  late Future<List<String>> _employeesFuture;
-  late Future<List<String>> _componentsFuture;
+  int? _selectedComponentId;
+  late Future<List<Map<String, dynamic>>> _employeesFuture;
+  Future<List<Map<String, dynamic>>>? _componentsFuture;
 
   @override
   void initState() {
     super.initState();
     _dateController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
     _employeesFuture = fetchEmployees();
-    _componentsFuture = fetchSalaryComponents();
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -47,16 +43,16 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('auth_token');
 
-    if (_selectedEmployee != null && _selectedComponent != null && _amountController.text.isNotEmpty) {
+    if (_selectedEmployee != null && _selectedComponentId != null && _amountController.text.isNotEmpty) {
       final response = await http.post(
-        Uri.parse('http://192.168.8.153/accounts/api/salary-transactions/'),
+        Uri.parse('http://192.168.8.153/accounts/api/add-salary-transaction/'),
         headers: {
           'Authorization': 'Token $token',
           'Content-Type': 'application/json',
         },
         body: json.encode({
           'farm_member': _selectedEmployee,
-          'component': _selectedComponent,
+          'component': _selectedComponentId,
           'amount_paid': _amountController.text,
           'transaction_date': DateFormat('yyyy-MM-dd').format(DateFormat('dd/MM/yyyy').parse(_dateController.text)),
           'description': _noteController.text,
@@ -66,6 +62,7 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
       if (response.statusCode == 201) {
         _showSuccessDialog();
       } else {
+        print("Failed to create salary transaction: ${response.body}");
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to create salary transaction')));
       }
     }
@@ -129,8 +126,7 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
     );
   }
 
-  Future<List<String>> fetchEmployees() async {
-    // Fetch the list of active employees from the API
+  Future<List<Map<String, dynamic>>> fetchEmployees() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('auth_token');
     final response = await http.get(
@@ -141,25 +137,24 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
     );
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      return data.map((e) => e['name'] as String).toList();
+      return data.map((e) => {'id': e['id'], 'name': '${e['first_name']} ${e['last_name']}'}).toList();
     } else {
       throw Exception('Failed to load employees');
     }
   }
 
-  Future<List<String>> fetchSalaryComponents() async {
-    // Fetch the list of salary components from the API
+  Future<List<Map<String, dynamic>>> fetchSalaryComponents(int memberId) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('auth_token');
     final response = await http.get(
-      Uri.parse('http://192.168.8.153/accounts/api/salary-components/<int:member_id>/'),
+      Uri.parse('http://192.168.8.153/accounts/api/salary-components/$memberId/'),
       headers: {
         'Authorization': 'Token $token',
       },
     );
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      return data.map((e) => e['name'] as String).toList();
+      return data.map((e) => {'id': e['id'], 'name': e['name']}).toList();
     } else {
       throw Exception('Failed to load salary components');
     }
@@ -193,7 +188,7 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FutureBuilder<List<String>>(
+              FutureBuilder<List<Map<String, dynamic>>>(
                 future: _employeesFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -217,15 +212,16 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
                         ),
                         labelStyle: TextStyle(color: Color(0xFF0DA487)),
                       ),
-                      items: employees.map((String employee) {
+                      items: employees.map((employee) {
                         return DropdownMenuItem(
-                          value: employee,
-                          child: Text(employee, style: TextStyle(color: Color(0xFF0DA487))),
+                          value: employee['id'].toString(),
+                          child: Text(employee['name'], style: TextStyle(color: Color(0xFF0DA487))),
                         );
                       }).toList(),
                       onChanged: (newValue) {
                         setState(() {
                           _selectedEmployee = newValue as String?;
+                          _componentsFuture = fetchSalaryComponents(int.parse(newValue!));
                         });
                       },
                       validator: (value) {
@@ -239,51 +235,52 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
                 },
               ),
               SizedBox(height: 10),
-              FutureBuilder<List<String>>(
-                future: _componentsFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Failed to load salary components');
-                  } else {
-                    final components = snapshot.data!;
-                    return DropdownButtonFormField(
-                      value: _selectedComponent,
-                      decoration: InputDecoration(
-                        labelText: 'Select Component',
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF0DA487)),
+              if (_componentsFuture != null)
+                FutureBuilder<List<Map<String, dynamic>>>(
+                  future: _componentsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Failed to load salary components');
+                    } else {
+                      final components = snapshot.data!;
+                      return DropdownButtonFormField(
+                        value: _selectedComponentId?.toString(),
+                        decoration: InputDecoration(
+                          labelText: 'Select Component',
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF0DA487)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF0DA487)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF0DA487)),
+                          ),
+                          labelStyle: TextStyle(color: Color(0xFF0DA487)),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF0DA487)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF0DA487)),
-                        ),
-                        labelStyle: TextStyle(color: Color(0xFF0DA487)),
-                      ),
-                      items: components.map((String component) {
-                        return DropdownMenuItem(
-                          value: component,
-                          child: Text(component, style: TextStyle(color: Color(0xFF0DA487))),
-                        );
-                      }).toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          _selectedComponent = newValue as String?;
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Please select a component';
-                        }
-                        return null;
-                      },
-                    );
-                  }
-                },
-              ),
+                        items: components.map((component) {
+                          return DropdownMenuItem(
+                            value: component['id'].toString(),
+                            child: Text(component['name'], style: TextStyle(color: Color(0xFF0DA487))),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedComponentId = int.parse(newValue!);
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a component';
+                          }
+                          return null;
+                        },
+                      );
+                    }
+                  },
+                ),
               SizedBox(height: 10),
               InkWell(
                 onTap: () => _selectDate(context),
