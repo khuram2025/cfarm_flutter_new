@@ -135,15 +135,29 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
         'Authorization': 'Token $token',
       },
     );
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      return data.map((e) => {'id': e['id'], 'name': '${e['first_name']} ${e['last_name']}'}).toList();
+      data.forEach((e) {
+        print('Profile ID: ${e['id']}, Employee Name: ${e['first_name']} ${e['last_name']}, CustomUser ID: ${e['user_id']}');
+      });
+      return data.map((e) {
+        if (e['user_id'] != null) {
+          return {'id': e['user_id'], 'name': '${e['first_name']} ${e['last_name']}'};
+        } else {
+          return null;
+        }
+      }).where((element) => element != null).cast<Map<String, dynamic>>().toList();
     } else {
       throw Exception('Failed to load employees');
     }
   }
 
+
+
+
   Future<List<Map<String, dynamic>>> fetchSalaryComponents(int memberId) async {
+    print('Fetching salary components for CustomUser ID: $memberId');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('auth_token');
     final response = await http.get(
@@ -152,13 +166,18 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
         'Authorization': 'Token $token',
       },
     );
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
+      data.forEach((e) {
+        print('Component Name: ${e['name']}, Component ID: ${e['id']}');
+      });
       return data.map((e) => {'id': e['id'], 'name': e['name']}).toList();
     } else {
       throw Exception('Failed to load salary components');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +213,10 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return CircularProgressIndicator();
                   } else if (snapshot.hasError) {
+                    print('Error: ${snapshot.error}');
                     return Text('Failed to load employees');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Text('No employees found');
                   } else {
                     final employees = snapshot.data!;
                     return DropdownButtonFormField(
@@ -221,7 +243,9 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
                       onChanged: (newValue) {
                         setState(() {
                           _selectedEmployee = newValue as String?;
-                          _componentsFuture = fetchSalaryComponents(int.parse(newValue!));
+                          if (_selectedEmployee != null) {
+                            _componentsFuture = fetchSalaryComponents(int.parse(_selectedEmployee!));
+                          }
                         });
                       },
                       validator: (value) {
@@ -234,6 +258,9 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
                   }
                 },
               ),
+
+
+
               SizedBox(height: 10),
               if (_componentsFuture != null)
                 FutureBuilder<List<Map<String, dynamic>>>(
