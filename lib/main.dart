@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
         '/animals': (context) => AnimalListMobilePage(),
 
         '/success': (context) => SuccessScreen(),
-        '/erp': (context) => TransactionEntryScreen(),
+
         '/findashboard': (context) => AnalyticsScreen(),
 
 

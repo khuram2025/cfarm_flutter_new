@@ -190,7 +190,7 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TransactionEntryScreen(), // or AddTransactionScreen() for income
+        builder: (context) => TransactionEntryScreen(initialTabIndex: widget.isIncome ? 1 : 0), // or AddTransactionScreen() for income
       ),
     );
   }

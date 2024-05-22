@@ -9,14 +9,17 @@ import 'package:untitled3/Finance/addSalaryTransaction.dart';
 
 import '../services/api_service.dart';
 
-
 void main() {
   runApp(MaterialApp(
-    home: TransactionEntryScreen(),
+    home: TransactionEntryScreen(initialTabIndex: 0), // default to expense tab
   ));
 }
 
 class TransactionEntryScreen extends StatefulWidget {
+  final int initialTabIndex;
+
+  const TransactionEntryScreen({Key? key, required this.initialTabIndex}) : super(key: key);
+
   @override
   _TransactionEntryScreenState createState() => _TransactionEntryScreenState();
 }
@@ -34,7 +37,7 @@ class _TransactionEntryScreenState extends State<TransactionEntryScreen> with Si
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: widget.initialTabIndex);
     _dateController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
     _categoriesFuture = fetchCategories();
   }
