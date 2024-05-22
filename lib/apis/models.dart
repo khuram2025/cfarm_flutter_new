@@ -24,7 +24,7 @@ class Animal {
   });
 
   factory Animal.fromJson(Map<String, dynamic> json) {
-    String baseUrl = 'http://farmapp.channab.com';
+    String baseUrl = 'https://farm.channab.com';
     String imagePath = json['image'] as String? ?? '';
     String fullImagePath = imagePath.isNotEmpty ? baseUrl + imagePath : 'default_image_url_here';
     return Animal(

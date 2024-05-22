@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Function to login user
 Future<Map<String, dynamic>?> loginUser(String mobileNumber, String password) async {
   final response = await http.post(
-    Uri.parse('http://farmapp.channab.com/accounts/api/login/'), // Replace with your API URL
+    Uri.parse('https://farm.channab.com/accounts/api/login/'),
     body: {
       'username': mobileNumber,
       'password': password,
@@ -96,7 +95,6 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 40),
-              // Username field with country code and flag
               Row(
                 children: [
                   Expanded(
@@ -119,7 +117,6 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                 ],
               ),
               SizedBox(height: 20),
-              // Password field
               TextField(
                 controller: _passwordController,
                 obscureText: true,
@@ -135,7 +132,6 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                 ),
               ),
               SizedBox(height: 20),
-              // Login button
               if (_isLoading)
                 Center(child: CircularProgressIndicator())
               else
@@ -165,7 +161,6 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                   ),
                 ),
               SizedBox(height: 20),
-              // Links to sign up and forget password
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

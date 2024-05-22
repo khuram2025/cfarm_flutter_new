@@ -26,7 +26,6 @@ class _FilterPageWidgetState extends State<FilterPageWidget> {
     'Last Month',
     'This Year',
     'Last Year',
-    'Last Year',
     'Same Month Last Year',
     'Custom Date Range'
   ];
