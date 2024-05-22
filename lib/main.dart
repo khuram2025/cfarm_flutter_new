@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
         '/transactions': (context) => TransactionPageWidget(isIncome: false),
         '/filter': (context) => FilterPageWidget(),
         '/animals': (context) => AnimalListMobilePage(),
-        '/amount-entry': (context) => AmountEntryScreen(),
+
         '/success': (context) => SuccessScreen(),
         '/erp': (context) => TransactionEntryScreen(),
         '/findashboard': (context) => AnalyticsScreen(),

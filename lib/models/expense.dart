@@ -54,11 +54,11 @@ class Transaction {
 
 // filter_model.dart
 class FilterModel {
-  final String type;
-  final String category;
-  final RangeValues amountRange;
-  final String dateFilter;
-  final DateTimeRange? customDateRange;
+  String type;
+  String category;
+  RangeValues amountRange;
+  String dateFilter;
+  DateTimeRange? customDateRange;
 
   FilterModel({
     required this.type,
@@ -67,5 +67,22 @@ class FilterModel {
     required this.dateFilter,
     this.customDateRange,
   });
-}
 
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type,
+      'category': category,
+      'amountRange': {
+        'start': amountRange.start,
+        'end': amountRange.end,
+      },
+      'dateFilter': dateFilter,
+      'customDateRange': customDateRange != null
+          ? {
+        'start': customDateRange!.start.toIso8601String(),
+        'end': customDateRange!.end.toIso8601String(),
+      }
+          : null,
+    };
+  }
+}

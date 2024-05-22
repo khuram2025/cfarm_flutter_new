@@ -12,7 +12,7 @@ class CustomDrawer extends StatelessWidget {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     final response = await http.post(
-      Uri.parse('http://192.168.8.153/accounts/api/logout/'),
+      Uri.parse('http://farmapp.channab.com/accounts/api/logout/'),
       headers: {
         'Authorization': 'Token $token',
       },
@@ -29,7 +29,7 @@ class CustomDrawer extends StatelessWidget {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     final response = await http.get(
-      Uri.parse('http://192.168.8.153/accounts/api/user-profile/'),
+      Uri.parse('http://farmapp.channab.com/accounts/api/user-profile/'),
       headers: {
         'Authorization': 'Token $token',
       },
@@ -121,13 +121,7 @@ class CustomDrawer extends StatelessWidget {
                     Navigator.pushNamed(context, '/milk-records');
                   },
                 ),
-                ListTile(
-                  leading: Icon(Icons.local_drink),
-                  title: Text('Add Expense'),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/amount-entry');
-                  },
-                ),
+
                 ListTile(
                   leading: Icon(Icons.local_drink),
                   title: Text('findashboard'),
@@ -135,27 +129,9 @@ class CustomDrawer extends StatelessWidget {
                     Navigator.pushNamed(context, '/findashboard');
                   },
                 ),
-                ListTile(
-                  leading: Icon(Icons.local_drink),
-                  title: Text('ERP'),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/erp');
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.local_drink),
-                  title: Text('Success'),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/success');
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.local_drink),
-                  title: Text('Transaction List'),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/list');
-                  },
-                ),
+
+
+
                 Spacer(),
                 ListTile(
                   leading: Icon(Icons.logout),

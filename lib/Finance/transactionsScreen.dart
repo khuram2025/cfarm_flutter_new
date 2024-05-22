@@ -22,7 +22,7 @@ class TransactionPageWidget extends StatefulWidget {
 class _TransactionPageWidgetState extends State<TransactionPageWidget> {
   late Future<List<Transaction>> _transactionsFuture;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  FilterModel? activeFilters;
+  FilterModel? activeFilters = FilterModel(dateFilter: 'This Month', type: '', category: '', amountRange: RangeValues(0, 10000000), );
   Map<String, Color> _categoryColors = {};
   DateTime _selectedDate = DateTime.now();
   String _selectedCategory = 'All';
@@ -42,7 +42,7 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
   @override
   void initState() {
     super.initState();
-    _fetchTransactions();
+    _fetchTransactions(activeFilters);
   }
 
   void _fetchTransactions([FilterModel? filters]) {
@@ -56,11 +56,23 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     final url = widget.isIncome
-        ? 'http://192.168.8.153/erp/api/income/'
-        : 'http://192.168.8.153/erp/api/expenses/';
+        ? 'http://farmapp.channab.com/erp/api/income/'
+        : 'http://farmapp.channab.com/erp/api/expenses/';
+
+    Map<String, String> queryParams = {};
+    if (filters != null) {
+      queryParams['time_filter'] = filters.dateFilter;
+      if (filters.customDateRange != null) {
+        queryParams['start_date'] = filters.customDateRange!.start.toIso8601String();
+        queryParams['end_date'] = filters.customDateRange!.end.toIso8601String();
+      }
+      print('Applying Filters: ${filters.toJson()}');  // Debug statement
+    }
+
+    final uri = Uri.parse(url).replace(queryParameters: queryParams);
 
     final response = await http.get(
-      Uri.parse(url),
+      uri,
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Token $token",
@@ -69,11 +81,14 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
 
     if (response.statusCode == 200) {
       List<dynamic> transactionsJson = json.decode(response.body) as List;
+
+      // Print the raw data received from the API
+      print('Received Data: $transactionsJson');  // Debug statement
+
       List<Transaction> transactions = transactionsJson.map((json) => Transaction.fromJson(json)).toList();
 
-      if (filters != null) {
-        transactions = _applyFilters(transactions, filters);
-      }
+      // Debug statement to check transactions after parsing JSON
+      print('Parsed Transactions: $transactions');
 
       // Assign colors dynamically to categories
       transactions.forEach((transaction) {
@@ -100,6 +115,7 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
       transactions = transactions.where((transaction) => transaction.category == filters.category).toList();
     }
     transactions = transactions.where((transaction) => transaction.amount >= filters.amountRange.start && transaction.amount <= filters.amountRange.end).toList();
+
     if (filters.dateFilter != 'All') {
       DateTime now = DateTime.now();
       DateTime startDate;
@@ -133,8 +149,12 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
           startDate = DateTime(2000);
           endDate = DateTime(2101);
       }
+      print('Start Date: $startDate, End Date: $endDate');  // Debug statement
       transactions = transactions.where((transaction) => transaction.date.isAfter(startDate) && transaction.date.isBefore(endDate)).toList();
     }
+
+    // Debug statement to check transactions after applying filters
+    print('Filtered Transactions: $transactions');
 
     return transactions;
   }
@@ -285,7 +305,7 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
                               _buildTransactionItem(
                                 context,
                                 transaction.category,
-                                DateFormat('yyyy-MM-dd').format(transaction.date),
+                                DateFormat('d MMM, yyyy').format(transaction.date),
                                 'Rs. ${transaction.amount}',
                                 transaction.description,
                               ),

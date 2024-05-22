@@ -26,6 +26,8 @@ class _FilterPageWidgetState extends State<FilterPageWidget> {
     'Last Month',
     'This Year',
     'Last Year',
+    'Last Year',
+    'Same Month Last Year',
     'Custom Date Range'
   ];
 
@@ -76,7 +78,7 @@ class _FilterPageWidgetState extends State<FilterPageWidget> {
     setState(() {
       _selectedType = 'All';
       _selectedCategory = 'All';
-      _amountRange = const RangeValues(0, 10000);
+      _amountRange = const RangeValues(0, 100000000);
       _selectedDateFilter = 'All';
       _customDateRange = null;
     });
