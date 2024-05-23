@@ -56,8 +56,8 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     final url = widget.isIncome
-        ? 'https://farm.channab.com/erp/api/income/'
-        : 'https://farm.channab.com/erp/api/expenses/';
+        ? 'http://farmapp.channab.com/erp/api/income/'
+        : 'http://farmapp.channab.com/erp/api/expenses/';
 
     Map<String, String> queryParams = {};
     if (filters != null) {

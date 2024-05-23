@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const String baseUrl = 'https://farm.channab.com';
+const String baseUrl = 'http://farmapp.channab.com';
 
 class Animal {
 final int id;
