@@ -14,6 +14,7 @@ final String categoryTitle;
 final double? purchaseCost;
 final String? imagePath;
 
+
 Animal({
 required this.id,
 required this.tag,

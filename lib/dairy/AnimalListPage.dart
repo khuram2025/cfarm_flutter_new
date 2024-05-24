@@ -2,11 +2,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../home/customDrawer.dart';
+import '../home/finCustomeAppbar.dart';
 import '../models/animals.dart';
+import '../widgets/AnimalChipRow.dart';
 import '../widgets/animalListCard.dart';
 import 'AnimalDetail.dart';
+import 'addAnimalPage.dart';
 import 'animalFilterScreen.dart';
+
 
 const String baseUrl = 'http://farmapp.channab.com';
 
@@ -120,132 +124,42 @@ class _AnimalListMobilePageState extends State<AnimalListMobilePage> {
     fetchAnimals('All', filters); // Apply the filters to fetch animals
   }
 
+  void _handleTypeSelected(String type) {
+    setState(() {
+      selectedType = type;
+      fetchAnimals(type);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Animal List'),
+      appBar: FinCustomAppBar(
+        title: 'Animal List',
+        onAddTransaction: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddAnimalPage(),
+            ),
+          );
+        },
+        onFilter: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AnimalFilterPage(onApplyFilter: _applyFilters),
+            ),
+          );
+        },
       ),
+      drawer: CustomDrawer(),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        ChoiceChip(
-                          label: Text('All (${animalCounts['All']})'),
-                          selected: selectedType == 'All',
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                selectedType = 'All';
-                              });
-                              fetchAnimals('All');
-                            }
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        ChoiceChip(
-                          label: Text('Milking (${animalCounts['milking']})'),
-                          selected: selectedType == 'milking',
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                selectedType = 'milking';
-                              });
-                              fetchAnimals('milking');
-                            }
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        ChoiceChip(
-                          label: Text('Preg-Milking (${animalCounts['preg_milking']})'),
-                          selected: selectedType == 'preg_milking',
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                selectedType = 'preg_milking';
-                              });
-                              fetchAnimals('preg_milking');
-                            }
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        ChoiceChip(
-                          label: Text('Pregnant (${animalCounts['pregnant']})'),
-                          selected: selectedType == 'pregnant',
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                selectedType = 'pregnant';
-                              });
-                              fetchAnimals('pregnant');
-                            }
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        ChoiceChip(
-                          label: Text('Dry (${animalCounts['dry']})'),
-                          selected: selectedType == 'dry',
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                selectedType = 'dry';
-                              });
-                              fetchAnimals('dry');
-                            }
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        ChoiceChip(
-                          label: Text('Breeder (${animalCounts['breeder']})'),
-                          selected: selectedType == 'breeder',
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                selectedType = 'breeder';
-                              });
-                              fetchAnimals('breeder');
-                            }
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        ChoiceChip(
-                          label: Text('Other (${animalCounts['other']})'),
-                          selected: selectedType == 'other',
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                selectedType = 'other';
-                              });
-                              fetchAnimals('other');
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    // Navigate to Animal Filter Page
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AnimalFilterPage(onApplyFilter: _applyFilters),
-                      ),
-                    );
-                  },
-                  child: Text('Filter'),
-                ),
-              ],
-            ),
+          AnimalTypeFilter(
+            selectedType: selectedType!,
+            animalCounts: animalCounts,
+            onTypeSelected: _handleTypeSelected,
           ),
           Expanded(
             child: ListView.builder(
@@ -269,6 +183,7 @@ class _AnimalListMobilePageState extends State<AnimalListMobilePage> {
                     type: animal.animalType,
                     status: animal.status,
                     image: animal.imagePath ?? '', // Provide a default or placeholder image if imagePath is null
+                    dob: animal.dob, // Pass the date of birth
                     onEdit: () {
                       // Handle edit action for this animal
                     },
@@ -285,4 +200,3 @@ class _AnimalListMobilePageState extends State<AnimalListMobilePage> {
     );
   }
 }
-

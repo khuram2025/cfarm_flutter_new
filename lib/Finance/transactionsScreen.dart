@@ -1,14 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import 'package:untitled3/Finance/addExpense.dart';
 import '../home/finCustomeAppbar.dart';
 import '../models/expense.dart';
 import 'addTransaction.dart';
 import 'transactionFilter.dart';
 import '../home/customDrawer.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class TransactionPageWidget extends StatefulWidget {
   final bool isIncome;
@@ -228,9 +228,6 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
         backgroundColor: Theme.of(context).backgroundColor,
         appBar: FinCustomAppBar(
           title: widget.isIncome ? 'Income' : 'Expense',
-          isIncome: widget.isIncome,
-          selectedDate: _selectedDate,
-          onDateChanged: _handleDateChange,
           onAddTransaction: _handleAddTransaction,
           onFilter: _handleFilter,
         ),

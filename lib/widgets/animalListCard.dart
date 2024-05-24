@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:untitled3/widgets/MediumButton.dart';
-
 import '../utils/base.dart';
 
+import '../utils/caluate_age.dart'; // Import the age calculator
 
 class AnimalListCard extends StatelessWidget {
   const AnimalListCard({
@@ -13,6 +13,7 @@ class AnimalListCard extends StatelessWidget {
     required this.type,
     required this.status,
     required this.image,
+    required this.dob,
     this.onEdit,
     this.onDelete,
   }) : super(key: key);
@@ -22,6 +23,7 @@ class AnimalListCard extends StatelessWidget {
   final String type;
   final String status;
   final String image;
+  final DateTime dob; // Add this field
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
@@ -60,7 +62,6 @@ class AnimalListCard extends StatelessWidget {
                           ),
                         ),
                         Row(
-
                           children: [
                             IconButton(
                               icon: const FaIcon(FontAwesomeIcons.edit),
@@ -69,14 +70,14 @@ class AnimalListCard extends StatelessWidget {
                               color: AppColors.primary,
                               padding: EdgeInsets.zero, // Remove any padding
                               constraints: BoxConstraints(), // Remove default constraints
-
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete_forever_rounded),
                               onPressed: onDelete,
                               iconSize: 16,
                               color: AppColors.tertiary,
-
+                              padding: EdgeInsets.zero, // Remove any padding
+                              constraints: BoxConstraints(), // Remove default constraints
                             ),
                           ],
                         ),
@@ -87,53 +88,47 @@ class AnimalListCard extends StatelessWidget {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: '${type.isEmpty ? type : type[0].toUpperCase() + type.substring(1)} - ',
+                            text: '${type.isEmpty ? type : type[0].toUpperCase() + type.substring(1)}  ',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.blue,
                             ),
                           ),
-                          const TextSpan(
-                            text: '1 Year 2 months 30 Days', // This value should be dynamic in your app
-                            style: TextStyle(
-                              color: Colors.grey,
-                            ),
-                          ),
+
                         ],
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // Similarly, make the "Age" dynamic in your application
-                    const Text(
-                      'Age: 1 Year 2 months 30 Days',
-                      style: TextStyle(
+                    Text(
+                      'Age: ${calculateAge(dob)}', // Dynamic age calculation
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const Spacer(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    MediumButton(
-                      btnText: sex,
-                      onPressed: () {
-                        // Handle action for sex button
-                      },
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        MediumButton(
+                          btnText: sex,
+                          onPressed: () {
+                            // Handle action for sex button
+                          },
+                        ),
+                        MediumButton(
+                          btnText: status,
+                          onPressed: () {
+                            // Handle action for status button
+                          },
+                        ),
+                        MediumButton(
+                          btnText: 'Cow',
+                          onPressed: () {
+                            // Handle action for 'Cow' button
+                          },
+                        ),
+                      ],
                     ),
-                    MediumButton(
-                      btnText: status,
-                      onPressed: () {
-                        // Handle action for status button
-                      },
-                    ),
-                    MediumButton(
-                      btnText: 'Cow',
-                      onPressed: () {
-                        // Handle action for 'Cow' button
-                      },
-                    ),
-                  ],
-                ),
                   ],
                 ),
               ),
