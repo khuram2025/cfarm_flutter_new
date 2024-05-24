@@ -3,11 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:untitled3/Finance/transactionsScreen.dart';
 
 import '../apis/erpApiServices.dart';
+import '../services/animalsAPI.dart'; // Import the API service
 import '../models/erpModels.dart';
-import '../widgets/animalCategoryWidgets.dart';
 import '../widgets/chart_widget.dart';
 import '../widgets/income_expense_widget.dart';
 import '../widgets/transaction_list_widget.dart';
+import '../widgets/animal_bar_chart_widget.dart';
 
 void main() {
   runApp(MyApp());
@@ -37,20 +38,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   double totalExpense = 0;
   double todayMilk = 105; // Example value, replace with actual logic to fetch this data.
 
-  Map<String, int> animalCounts = {
-    'All': 27,  // Total of all animals
-    'Milking': 10,  // Example values, replace with actual data fetching logic
-    'Pregnant': 5,
-    'Dry': 7,
-    'Breeder': 3,
-    'Other': 2,
-  };
+  List<Map<String, dynamic>> _typesWithCounts = [];
+  List<Map<String, dynamic>> _categoriesWithCounts = [];
 
   @override
   void initState() {
     super.initState();
     _fetchSummaryData();
     _fetchTransactions();
+    _fetchCategoriesAndTypes();
   }
 
   void _fetchSummaryData() {
@@ -76,6 +72,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     setState(() {
       _transactionsFuture = ApiService.fetchTransactions();
     });
+  }
+
+  void _fetchCategoriesAndTypes() async {
+    try {
+      var data = await AnimalsAPI().fetchCategoriesAndTypes();
+      setState(() {
+        _typesWithCounts = data['types'].map<Map<String, dynamic>>((t) => {'animal_type': t['animal_type'], 'count': t['count']}).toList();
+        _categoriesWithCounts = data['categories'].map<Map<String, dynamic>>((c) => {'category': c['category__title'], 'count': c['count']}).toList();
+      });
+    } catch (e) {
+      print('Failed to load categories and types');
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -172,41 +180,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ChartWidget(summaryDataFuture: _summaryDataFuture),
             SizedBox(height: 16),
             TransactionListWidget(transactionsFuture: _transactionsFuture),
-
-            Text("Animal Types"),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: animalCounts.keys.map((category) {
-                  Color color;
-                  switch (category) {
-                    case 'Milking':
-                      color = Colors.green;
-                      break;
-                    case 'Pregnant':
-                      color = Colors.pink;
-                      break;
-                    case 'Dry':
-                      color = Colors.brown;
-                      break;
-                    case 'Breeder':
-                      color = Colors.orange;
-                      break;
-                    case 'Other':
-                      color = Colors.grey;
-                      break;
-                    default:
-                      color = Colors.blue;
-                  }
-                  return AnimalCategoryWidget(
-                    title: category,
-                    count: animalCounts[category]!,
-                    color: color,
-                  );
-                }).toList(),
-              ),
-            ),
             SizedBox(height: 16),
+            Text("Animal Types"),
+            AnimalBarChartWidget(
+              animalTypes: _typesWithCounts,
+              animalCategories: _categoriesWithCounts,
+            ),
           ],
         ),
       ),
