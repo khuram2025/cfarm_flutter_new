@@ -13,17 +13,14 @@ class ChartWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
+
       padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Comparison Chart',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            'Last 6 Month Income & Expense',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0DA487)),
           ),
           SizedBox(height: 16),
           Container(

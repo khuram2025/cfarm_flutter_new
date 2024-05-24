@@ -15,17 +15,26 @@ class SummaryData {
 }
 
 class Transaction {
-  Transaction({required this.category, required this.amount, required this.date});
-
   final String category;
   final double amount;
   final DateTime date;
+  final bool isIncome;
 
-  factory Transaction.fromJson(Map<String, dynamic> json) {
+  Transaction({
+    required this.category,
+    required this.amount,
+    required this.date,
+    required this.isIncome,
+  });
+
+  factory Transaction.fromJson(Map<String, dynamic> json, bool isIncome) {
     return Transaction(
       category: json['category'] ?? '',
       amount: double.tryParse(json['amount'].toString()) ?? 0.0,
       date: DateTime.parse(json['date']),
+      isIncome: isIncome,
     );
   }
 }
+
+

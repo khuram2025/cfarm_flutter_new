@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-import 'TextOverlayPainter.dart';
-
 class AnimalBarChartWidget extends StatelessWidget {
   final List<Map<String, dynamic>> animalTypes;
   final List<Map<String, dynamic>> animalCategories;
@@ -14,10 +12,6 @@ class AnimalBarChartWidget extends StatelessWidget {
     final List<ChartData> chartData = animalTypes
         .map((entry) => ChartData(entry['animal_type'], entry['count']))
         .toList();
-
-    String allText = "All ${animalCategories.fold<int>(0, (sum, item) => sum + (item['count'] as int))}";
-    String cowText = "Cow ${animalCategories.firstWhere((element) => element['category'] == 'Cow', orElse: () => {'count': 0})['count']}";
-    String buffaloText = "Buffalo ${animalCategories.firstWhere((element) => element['category'] == 'Buffalo', orElse: () => {'count': 0})['count']}";
 
     return Column(
       children: [
@@ -37,11 +31,6 @@ class AnimalBarChartWidget extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 8),
-        CustomPaint(
-          size: Size(double.infinity, 30), // Adjust height as needed
-          painter: TextOverlayPainter(allText, cowText, buffaloText),
-        ),
       ],
     );
   }
@@ -57,18 +46,20 @@ class ChartData {
 
   static Color _getColorForCategory(String category) {
     switch (category) {
-      case 'Milking':
-        return Colors.green;
-      case 'Pregnant':
-        return Colors.pink;
-      case 'Dry':
-        return Colors.brown;
-      case 'Breeder':
-        return Colors.orange;
+      case 'milking':
+        return Color(0xFF0DA487);
+      case 'preg_milking':
+        return Color(0xFFE91E63);
+      case 'dry':
+        return Color(0xFF795548);
+      case 'breeder':
+        return Color(0xFFFF9800);
       case 'Other':
-        return Colors.grey;
+        return Color(0xFF9E9E9E);
+      case 'calf':
+        return Color(0xFF2196F3);
       default:
-        return Colors.blue;
+        return Color(0xFF9E9E9E);
     }
   }
 }

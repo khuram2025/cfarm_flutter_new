@@ -135,44 +135,50 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           children: [
             Row(
               children: [
-                IncomeExpenseWidget(
-                  title: 'Income',
-                  amount: totalIncome,
-                  color: Colors.green,
-                  isIncome: true,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TransactionPageWidget(isIncome: true),
-                      ),
-                    );
-                  },
+                Expanded(
+                  child: IncomeExpenseWidget(
+                    title: 'Income',
+                    amount: totalIncome,
+                    color: Colors.green,
+                    isIncome: true,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TransactionPageWidget(isIncome: true),
+                        ),
+                      );
+                    },
+                  ),
                 ),
                 SizedBox(width: 8),
-                IncomeExpenseWidget(
-                  title: 'Expenses',
-                  amount: totalExpense,
-                  color: Colors.red,
-                  isIncome: false,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TransactionPageWidget(isIncome: false),
-                      ),
-                    );
-                  },
+                Expanded(
+                  child: IncomeExpenseWidget(
+                    title: 'Expenses',
+                    amount: totalExpense,
+                    color: Colors.red,
+                    isIncome: false,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TransactionPageWidget(isIncome: false),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-                SizedBox(width: 16),
-                IncomeExpenseWidget(
-                  title: 'Today Milk',
-                  amount: todayMilk,
-                  color: Colors.blue,
-                  isIncome: true, // Adjust this as needed
-                  onTap: () {
-                    // Define the action on tap if needed
-                  },
+                SizedBox(width: 8),
+                Expanded(
+                  child: IncomeExpenseWidget(
+                    title: 'Today Milk',
+                    amount: todayMilk,
+                    color: Colors.blue,
+                    isIncome: true, // Adjust this as needed
+                    onTap: () {
+                      // Define the action on tap if needed
+                    },
+                  ),
                 ),
               ],
             ),
@@ -181,14 +187,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             SizedBox(height: 16),
             TransactionListWidget(transactionsFuture: _transactionsFuture),
             SizedBox(height: 16),
-            Text("Animal Types"),
-            AnimalBarChartWidget(
-              animalTypes: _typesWithCounts,
-              animalCategories: _categoriesWithCounts,
-            ),
+
+
+            SizedBox(height: 16),
+            // AnimalCategoryInfo(
+            //   categories: _categoriesWithCounts,
+            // ),
           ],
         ),
       ),
     );
   }
 }
+
+

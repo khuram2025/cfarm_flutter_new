@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-
 import '../models/erpModels.dart';
-
-
-
 
 class TransactionListWidget extends StatelessWidget {
   final Future<List<Transaction>> transactionsFuture;
@@ -12,39 +8,39 @@ class TransactionListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: FutureBuilder<List<Transaction>>(
-        future: transactionsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Failed to load transactions: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No transactions found.'));
-          } else {
-            final transactions = snapshot.data!;
-            final categories = _getCategoryTotals(transactions);
-            return ListView.builder(
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                return Column(
-                  children: [
-                    _buildCategoryItem(
-                      context,
-                      category['category']!,
-                      'Rs. ${category['total']}',
-                      category['isIncome'] == 'true',
-                    ),
-                    Divider(thickness: .5, color: Colors.grey[200]),
-                  ],
-                );
-              },
-            );
-          }
-        },
-      ),
+    return FutureBuilder<List<Transaction>>(
+      future: transactionsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Failed to load transactions: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No transactions found.'));
+        } else {
+          final transactions = snapshot.data!;
+          final categories = _getCategoryTotals(transactions);
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              return Column(
+                children: [
+                  _buildCategoryItem(
+                    context,
+                    category['category']!,
+                    'Rs. ${category['total']}',
+                    category['isIncome'] == 'true',
+                  ),
+                  Divider(thickness: .5, color: Colors.grey[200]),
+                ],
+              );
+            },
+          );
+        }
+      },
     );
   }
 
@@ -55,7 +51,7 @@ class TransactionListWidget extends StatelessWidget {
     for (var transaction in transactions) {
       if (!categoryTotals.containsKey(transaction.category)) {
         categoryTotals[transaction.category] = 0;
-        categoryTypes[transaction.category] = transaction.category.contains('Income');
+        categoryTypes[transaction.category] = transaction.isIncome;
       }
       categoryTotals[transaction.category] = categoryTotals[transaction.category]! + transaction.amount;
     }
@@ -73,7 +69,7 @@ class TransactionListWidget extends StatelessWidget {
     Color categoryColor = isIncome ? Color(0xFF0DA487) : Colors.red;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

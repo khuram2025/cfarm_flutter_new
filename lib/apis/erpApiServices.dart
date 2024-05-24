@@ -55,8 +55,8 @@ class ApiService {
       List<dynamic> incomeJson = json.decode(incomeResponse.body) as List;
       List<dynamic> expensesJson = json.decode(expensesResponse.body) as List;
 
-      List<Transaction> incomeTransactions = incomeJson.map((json) => Transaction.fromJson(json)).toList();
-      List<Transaction> expensesTransactions = expensesJson.map((json) => Transaction.fromJson(json)).toList();
+      List<Transaction> incomeTransactions = incomeJson.map((json) => Transaction.fromJson(json, true)).toList();
+      List<Transaction> expensesTransactions = expensesJson.map((json) => Transaction.fromJson(json, false)).toList();
 
       incomeTransactions = incomeTransactions.take(5).toList();
       expensesTransactions = expensesTransactions.take(5).toList();
