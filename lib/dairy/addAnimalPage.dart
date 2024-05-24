@@ -116,12 +116,14 @@ class _AddAnimalPageState extends State<AddAnimalPage> {
         _isUploading = false;
       });
 
+      final responseBody = await response.stream.bytesToString();
+      final responseJson = json.decode(responseBody);
+
       if (response.statusCode == 201) {
         _showSuccessDialog();
       } else {
-        final responseBody = await response.stream.bytesToString();
-        print("Error response: $responseBody");
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to create animal')));
+        String errorMessage = responseJson['error'] ?? 'Failed to create animal';
+        _showErrorDialog(errorMessage);
       }
     }
   }
@@ -179,6 +181,26 @@ class _AddAnimalPageState extends State<AddAnimalPage> {
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
         );
       },
     );
