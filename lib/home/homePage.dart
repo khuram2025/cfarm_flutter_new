@@ -111,7 +111,7 @@ class _HomePageState extends State<HomePage> {
               ),
               SizedBox(height: 16), // Add some spacing between the widgets
               TransactionListWidget(transactionsFuture: _transactionsFuture),
-              SizedBox(height: 16), // Add some spacing between the widgets
+
               ChartWidget(summaryDataFuture: _summaryDataFuture),
 
               AnimalCategoryInfo(

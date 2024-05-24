@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:untitled3/widgets/MediumButton.dart';
 
+import '../utils/base.dart';
+
 
 class AnimalListCard extends StatelessWidget {
   const AnimalListCard({
@@ -54,23 +56,33 @@ class AnimalListCard extends StatelessWidget {
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
+                            color: AppColors.primary,
                           ),
                         ),
                         Row(
+
                           children: [
                             IconButton(
                               icon: const FaIcon(FontAwesomeIcons.edit),
                               onPressed: onEdit,
+                              iconSize: 14,
+                              color: AppColors.primary,
+                              padding: EdgeInsets.zero, // Remove any padding
+                              constraints: BoxConstraints(), // Remove default constraints
+
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete_forever_rounded),
                               onPressed: onDelete,
+                              iconSize: 16,
+                              color: AppColors.tertiary,
+
                             ),
                           ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     RichText(
                       text: TextSpan(
                         children: [
