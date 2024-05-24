@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'package:image/image.dart' as img;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+import 'addAnimalCategory.dart';
+
 void main() {
   runApp(MaterialApp(
     home: AddAnimalPage(),
@@ -29,7 +31,7 @@ class _AddAnimalPageState extends State<AddAnimalPage> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedCategory;
   String? _selectedSex;
-  String? _selectedStatus;
+  String? _selectedStatus = 'active';
   String? _selectedType;
   late Future<List<String>> _categoriesFuture;
 
@@ -37,6 +39,7 @@ class _AddAnimalPageState extends State<AddAnimalPage> {
   void initState() {
     super.initState();
     _dobController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
+    _priceController.text = '0';
     _categoriesFuture = fetchCategories();
   }
 
@@ -220,7 +223,9 @@ class _AddAnimalPageState extends State<AddAnimalPage> {
 
     if (response.statusCode == 200) {
       List<dynamic> categoriesJson = json.decode(response.body);
-      return categoriesJson.map<String>((category) => category['title']).toList();
+      List<String> categories = categoriesJson.map<String>((category) => category['title']).toList();
+      categories.add("Add Category"); // Adding the "Add Category" option
+      return categories;
     } else {
       throw Exception('Failed to load categories');
     }
@@ -380,15 +385,34 @@ class _AddAnimalPageState extends State<AddAnimalPage> {
                             items: categories.map((String category) {
                               return DropdownMenuItem(
                                 value: category,
-                                child: Text(category,
+                                child: Container(
+                                  color: category == "Add Category"
+                                      ? Color(0xFF0DA487)
+                                      : Colors.white,
+                                  child: Text(
+                                    category,
                                     style: TextStyle(
-                                        color: Color(0xFF0DA487))),
+                                      color: category == "Add Category"
+                                          ? Colors.white
+                                          : Color(0xFF0DA487),
+                                    ),
+                                  ),
+                                ),
                               );
                             }).toList(),
                             onChanged: (newValue) {
-                              setState(() {
-                                _selectedCategory = newValue as String?;
-                              });
+                              if (newValue == "Add Category") {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AddCategoryPage(),
+                                  ),
+                                );
+                              } else {
+                                setState(() {
+                                  _selectedCategory = newValue as String?;
+                                });
+                              }
                             },
                             validator: (value) {
                               if (value == null) {
@@ -418,9 +442,9 @@ class _AddAnimalPageState extends State<AddAnimalPage> {
                         ),
                         labelStyle: TextStyle(color: Color(0xFF0DA487)),
                       ),
-                      items: ['male', 'female'].map((String sex) {
+                      items: ['Male', 'Female'].map((String sex) {
                         return DropdownMenuItem(
-                          value: sex,
+                          value: sex.toLowerCase(),
                           child: Text(sex,
                               style: TextStyle(color: Color(0xFF0DA487))),
                         );
@@ -512,10 +536,9 @@ class _AddAnimalPageState extends State<AddAnimalPage> {
                         ),
                         labelStyle: TextStyle(color: Color(0xFF0DA487)),
                       ),
-                      items: ['active', 'expired', 'sold']
-                          .map((String status) {
+                      items: ['Active', 'Expired', 'Sold'].map((String status) {
                         return DropdownMenuItem(
-                          value: status,
+                          value: status.toLowerCase(),
                           child: Text(status,
                               style: TextStyle(color: Color(0xFF0DA487))),
                         );
@@ -551,16 +574,16 @@ class _AddAnimalPageState extends State<AddAnimalPage> {
                         labelStyle: TextStyle(color: Color(0xFF0DA487)),
                       ),
                       items: [
-                        'breeder',
-                        'pregnant',
-                        'dry',
-                        'milking',
-                        'preg_milking',
-                        'calf',
-                        'other'
+                        'Breeder',
+                        'Pregnant',
+                        'Dry',
+                        'Milking',
+                        'Preg_milking',
+                        'Calf',
+                        'Other'
                       ].map((String type) {
                         return DropdownMenuItem(
-                          value: type,
+                          value: type.toLowerCase(),
                           child: Text(type,
                               style: TextStyle(color: Color(0xFF0DA487))),
                         );
@@ -603,3 +626,4 @@ class _AddAnimalPageState extends State<AddAnimalPage> {
     );
   }
 }
+
