@@ -12,7 +12,7 @@ import 'addAnimalPage.dart';
 import 'animalFilterScreen.dart';
 
 
-const String baseUrl = 'http://farmapp.channab.com';
+const String baseUrl = 'https://farm.channab.com';
 
 class AnimalListMobilePage extends StatefulWidget {
   const AnimalListMobilePage({Key? key}) : super(key: key);

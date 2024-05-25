@@ -95,7 +95,7 @@ class _AddAnimalPageState extends State<AddAnimalPage> {
 
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://farmapp.channab.com/dairy/api/animals/create/'),
+        Uri.parse('https://farm.channab.com/dairy/api/animals/create/'),
       );
 
       request.headers['Authorization'] = 'Token $token';
@@ -214,7 +214,7 @@ class _AddAnimalPageState extends State<AddAnimalPage> {
     final String? token = prefs.getString('auth_token');
 
     final response = await http.get(
-      Uri.parse('http://farmapp.channab.com/dairy/api/categories/'),
+      Uri.parse('https://farm.channab.com/dairy/api/categories/'),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Token $token",
