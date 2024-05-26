@@ -29,12 +29,13 @@ class Transaction {
 
   factory Transaction.fromJson(Map<String, dynamic> json, bool isIncome) {
     return Transaction(
-      category: json['category'] ?? '',
-      amount: double.tryParse(json['amount'].toString()) ?? 0.0,
-      date: DateTime.parse(json['date']),
+      category: json['category__name'] ?? '',
+      amount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
+      date: DateTime.now(), // Date is not available in the current API response
       isIncome: isIncome,
     );
   }
 }
+
 
 

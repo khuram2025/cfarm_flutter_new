@@ -10,7 +10,7 @@ class ApiService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
 
-    final url = 'https://farm.channab.com/erp/api/income-expense-summary/';
+    final url = 'http://34.207.117.85:8001/erp/api/income-expense-summary/';
 
     final response = await http.get(
       Uri.parse(url),
@@ -24,6 +24,7 @@ class ApiService {
       List<dynamic> summaryJson = json.decode(response.body) as List;
       return summaryJson.map((json) => SummaryData.fromJson(json)).toList();
     } else {
+      print('Failed to load data: ${response.body}'); // Print the error response
       throw Exception('Failed to load summary data');
     }
   }
@@ -32,8 +33,8 @@ class ApiService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
 
-    final incomeUrl = 'https://farm.channab.com/erp/api/income/';
-    final expensesUrl = 'https://farm.channab.com/erp/api/expenses/';
+    final incomeUrl = 'http://34.207.117.85:8001/erp/api/current-month-income-summary/';
+    final expensesUrl = 'http://34.207.117.85:8001/erp/api/current-month-expense-summary/';
 
     final incomeResponse = await http.get(
       Uri.parse(incomeUrl),
@@ -52,22 +53,17 @@ class ApiService {
     );
 
     if (incomeResponse.statusCode == 200 && expensesResponse.statusCode == 200) {
-      List<dynamic> incomeJson = json.decode(incomeResponse.body) as List;
-      List<dynamic> expensesJson = json.decode(expensesResponse.body) as List;
+      List<dynamic> incomeJson = json.decode(incomeResponse.body)['category_incomes'];
+      List<dynamic> expensesJson = json.decode(expensesResponse.body)['category_expenses'];
 
       List<Transaction> incomeTransactions = incomeJson.map((json) => Transaction.fromJson(json, true)).toList();
       List<Transaction> expensesTransactions = expensesJson.map((json) => Transaction.fromJson(json, false)).toList();
-
-      incomeTransactions = incomeTransactions.take(5).toList();
-      expensesTransactions = expensesTransactions.take(5).toList();
 
       List<Transaction> allTransactions = []
         ..addAll(incomeTransactions)
         ..addAll(expensesTransactions);
 
-      allTransactions.sort((a, b) => b.date.compareTo(a.date));
-
-      return allTransactions.take(10).toList();
+      return allTransactions;
     } else {
       throw Exception('Failed to load transactions');
     }

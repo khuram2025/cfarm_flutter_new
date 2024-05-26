@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const String baseUrl = 'https://farm.channab.com';
+const String baseUrl = 'http://34.207.117.85:8001';
 
 class Animal {
 final int id;

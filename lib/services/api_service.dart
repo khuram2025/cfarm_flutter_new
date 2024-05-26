@@ -9,7 +9,7 @@ Future<List<Expense>> fetchExpenses() async {
   String? token = prefs.getString('auth_token');
 
   final response = await http.get(
-    Uri.parse('https://farm.channab.com/erp/api/expenses/'),
+    Uri.parse('http://34.207.117.85:8001/erp/api/expenses/'),
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Token $token",
@@ -31,7 +31,7 @@ Future<List<String>> fetchCategories() async {
   String? token = prefs.getString('auth_token');
 
   final response = await http.get(
-    Uri.parse('https://farm.channab.com/erp/api/expenses/categories/'),
+    Uri.parse('http://34.207.117.85:8001/erp/api/expenses/categories/'),
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Token $token",
@@ -57,7 +57,7 @@ Future<List<String>> fetchIncomeCategories() async {
   String? token = prefs.getString('auth_token');
 
   final response = await http.get(
-    Uri.parse('https://farm.channab.com/erp/api/income/categories/'),
+    Uri.parse('http://34.207.117.85:8001/erp/api/income/categories/'),
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Token $token",

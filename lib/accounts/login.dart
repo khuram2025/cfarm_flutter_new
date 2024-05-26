@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<Map<String, dynamic>?> loginUser(String mobileNumber, String password) async {
   final response = await http.post(
-    Uri.parse('https://farm.channab.com/accounts/api/login/'),
+    Uri.parse('http://34.207.117.85:8001/accounts/api/login/'),
     body: {
       'username': mobileNumber,
       'password': password,

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'dart:io';
 
 import 'package:untitled3/Finance/transactionsScreen.dart';
 
@@ -12,7 +11,7 @@ class CustomDrawer extends StatelessWidget {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     final response = await http.post(
-      Uri.parse('https://farm.channab.com/accounts/api/logout/'),
+      Uri.parse('http://34.207.117.85:8001/accounts/api/logout/'),
       headers: {
         'Authorization': 'Token $token',
       },
@@ -29,7 +28,7 @@ class CustomDrawer extends StatelessWidget {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     final response = await http.get(
-      Uri.parse('https://farm.channab.com/accounts/api/user-profile/'),
+      Uri.parse('http://34.207.117.85:8001/accounts/api/user-profile/'),
       headers: {
         'Authorization': 'Token $token',
       },
@@ -59,7 +58,7 @@ class CustomDrawer extends StatelessWidget {
             String lastName = snapshot.data!['lastName']!;
             String initials = (firstName.isNotEmpty ? firstName[0] : '') + (lastName.isNotEmpty ? lastName[0] : '');
 
-            return ListView(
+            return Column(
               children: <Widget>[
                 UserAccountsDrawerHeader(
                   accountName: Text('$firstName $lastName'),
@@ -74,65 +73,67 @@ class CustomDrawer extends StatelessWidget {
                     color: Color(0xFF0DA487),
                   ),
                 ),
-                ListTile(
-                  leading: Icon(Icons.home),
-                  title: Text('Home'),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/home');
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.pets),
-                  title: Text('Animals'),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/animals');
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.money),
-                  title: Text('Expense'),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TransactionPageWidget(isIncome: false),
+                Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: <Widget>[
+                      ListTile(
+                        leading: Icon(Icons.home),
+                        title: Text('Home'),
+                        onTap: () {
+                          Navigator.pushNamed(context, '/home');
+                        },
                       ),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.attach_money),
-                  title: Text('Income'),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TransactionPageWidget(isIncome: true),
+                      ListTile(
+                        leading: Icon(Icons.pets),
+                        title: Text('Animals'),
+                        onTap: () {
+                          Navigator.pushNamed(context, '/animals');
+                        },
                       ),
-                    );
-                  },
+                      ListTile(
+                        leading: Icon(Icons.money),
+                        title: Text('Expense'),
+                        onTap: () {
+                          Navigator.pop(context); // Close the drawer
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TransactionPageWidget(isIncome: false),
+                            ),
+                          );
+                        },
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.attach_money),
+                        title: Text('Income'),
+                        onTap: () {
+                          Navigator.pop(context); // Close the drawer
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TransactionPageWidget(isIncome: true),
+                            ),
+                          );
+                        },
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.local_drink),
+                        title: Text('Milk Records'),
+                        onTap: () {
+                          Navigator.pushNamed(context, '/milk-records');
+                        },
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.local_drink),
+                        title: Text('Find Dashboard'),
+                        onTap: () {
+                          Navigator.pushNamed(context, '/findashboard');
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                ListTile(
-                  leading: Icon(Icons.local_drink),
-                  title: Text('Milk Records'),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/milk-records');
-                  },
-                ),
-
-                ListTile(
-                  leading: Icon(Icons.local_drink),
-                  title: Text('findashboard'),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/findashboard');
-                  },
-                ),
-
-
-
-                Spacer(),
                 ListTile(
                   leading: Icon(Icons.logout),
                   title: Text('Logout'),

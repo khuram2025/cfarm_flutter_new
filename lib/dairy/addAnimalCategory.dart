@@ -24,7 +24,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
       });
 
       final response = await http.post(
-        Uri.parse('https://farm.channab.com/dairy/api/category/create/'),
+        Uri.parse('http://34.207.117.85:8001/dairy/api/category/create/'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Token $token",
