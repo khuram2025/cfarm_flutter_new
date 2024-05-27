@@ -72,7 +72,7 @@ class _AddFieldPageState extends State<AddFieldPage> {
 
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://farmapp.channab.com/api/fields/create/'),
+        Uri.parse('http://192.168.8.153/api/fields/create/'),
       );
 
       request.headers['Authorization'] = 'Token $token';

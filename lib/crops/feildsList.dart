@@ -4,7 +4,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String baseUrl = 'http://farmapp.channab.com';
+import '../models/fields.dart';
+import 'feildDetailPage.dart';
+
+const String baseUrl = 'http://192.168.8.153';
 
 class FieldListPage extends StatefulWidget {
   @override
@@ -69,28 +72,7 @@ class _FieldListPageState extends State<FieldListPage> {
   }
 }
 
-class Field {
-  final int id;
-  final String name;
-  final double area;
-  final String? imageUrl;
 
-  Field({
-    required this.id,
-    required this.name,
-    required this.area,
-    this.imageUrl,
-  });
-
-  factory Field.fromJson(Map<String, dynamic> json) {
-    return Field(
-      id: json['id'],
-      name: json['name'],
-      area: double.parse(json['area']),
-      imageUrl: json['image'],
-    );
-  }
-}
 
 class FieldCard extends StatelessWidget {
   final Field field;
@@ -99,107 +81,118 @@ class FieldCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: SizedBox(
-        height: 150,
-        child: Row(
-          children: [
-            SizedBox(
-              width: 150,
-              height: 150,
-              child: field.imageUrl != null
-                  ? Image.network(
-                field.imageUrl!,
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FieldDetailPage(field: field),
+          ),
+        );
+      },
+      child: Card(
+        child: SizedBox(
+          height: 150,
+          child: Row(
+            children: [
+              SizedBox(
                 width: 150,
                 height: 150,
-                fit: BoxFit.cover,
-              )
-                  : Container(
-                width: 150,
-                height: 150,
-                color: Colors.grey,
-                child: Icon(Icons.image_not_supported),
+                child: field.imageUrl != null
+                    ? Image.network(
+                  field.imageUrl!,
+                  width: 150,
+                  height: 150,
+                  fit: BoxFit.cover,
+                )
+                    : Container(
+                  width: 150,
+                  height: 150,
+                  color: Colors.grey,
+                  child: Icon(Icons.image_not_supported),
+                ),
               ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          field.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Color(0xFF0DA487),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const FaIcon(FontAwesomeIcons.edit),
-                              onPressed: () {
-                                // Handle edit action for this field
-                              },
-                              iconSize: 14,
-                              color: Color(0xFF0DA487),
-                              padding: EdgeInsets.zero, // Remove any padding
-                              constraints: BoxConstraints(), // Remove default constraints
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_forever_rounded),
-                              onPressed: () {
-                                // Handle delete action for this field
-                              },
-                              iconSize: 16,
-                              color: Colors.red,
-                              padding: EdgeInsets.zero, // Remove any padding
-                              constraints: BoxConstraints(), // Remove default constraints
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    RichText(
-                      text: TextSpan(
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          TextSpan(
-                            text: 'Area: ${field.area} acres',
+                          Text(
+                            field.name,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue,
+                              fontSize: 16,
+                              color: Color(0xFF0DA487),
                             ),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const FaIcon(FontAwesomeIcons.edit),
+                                onPressed: () {
+                                  // Handle edit action for this field
+                                },
+                                iconSize: 14,
+                                color: Color(0xFF0DA487),
+                                padding: EdgeInsets.zero, // Remove any padding
+                                constraints: BoxConstraints(), // Remove default constraints
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_forever_rounded),
+                                onPressed: () {
+                                  // Handle delete action for this field
+                                },
+                                iconSize: 16,
+                                color: Colors.red,
+                                padding: EdgeInsets.zero, // Remove any padding
+                                constraints: BoxConstraints(), // Remove default constraints
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ),
-                    const Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        MediumButton(
-                          btnText: 'Field',
-                          onPressed: () {
-                            // Handle action for Field button
-                          },
+                      const SizedBox(height: 4),
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Area: ${field.area} acres',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const Spacer(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          MediumButton(
+                            btnText: 'Field',
+                            onPressed: () {
+                              // Handle action for Field button
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
 
 class MediumButton extends StatelessWidget {
   final String btnText;
@@ -212,7 +205,7 @@ class MediumButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        primary: Color(0xFF0DA487),
+        backgroundColor: Color(0xFF0DA487),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
