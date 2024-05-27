@@ -10,7 +10,7 @@ class ApiService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
 
-    final url = 'http://34.207.117.85:8001/erp/api/income-expense-summary/';
+    final url = 'http://farmapp.channab.com/erp/api/income-expense-summary/';
 
     final response = await http.get(
       Uri.parse(url),
@@ -33,8 +33,8 @@ class ApiService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
 
-    final incomeUrl = 'http://34.207.117.85:8001/erp/api/current-month-income-summary/';
-    final expensesUrl = 'http://34.207.117.85:8001/erp/api/current-month-expense-summary/';
+    final incomeUrl = 'http://farmapp.channab.com/erp/api/current-month-income-summary/';
+    final expensesUrl = 'http://farmapp.channab.com/erp/api/current-month-expense-summary/';
 
     final incomeResponse = await http.get(
       Uri.parse(incomeUrl),

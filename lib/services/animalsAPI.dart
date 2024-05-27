@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AnimalsAPI {
-  final String baseUrl = "http://34.207.117.85:8001";
+  final String baseUrl = "http://farmapp.channab.com";
 
   Future<Map<String, dynamic>> fetchCategoriesAndTypes() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

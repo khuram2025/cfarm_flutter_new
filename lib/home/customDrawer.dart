@@ -11,7 +11,7 @@ class CustomDrawer extends StatelessWidget {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     final response = await http.post(
-      Uri.parse('http://34.207.117.85:8001/accounts/api/logout/'),
+      Uri.parse('http://farmapp.channab.com/accounts/api/logout/'),
       headers: {
         'Authorization': 'Token $token',
       },
@@ -28,7 +28,7 @@ class CustomDrawer extends StatelessWidget {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     final response = await http.get(
-      Uri.parse('http://34.207.117.85:8001/accounts/api/user-profile/'),
+      Uri.parse('http://farmapp.channab.com/accounts/api/user-profile/'),
       headers: {
         'Authorization': 'Token $token',
       },
@@ -129,6 +129,13 @@ class CustomDrawer extends StatelessWidget {
                         title: Text('Find Dashboard'),
                         onTap: () {
                           Navigator.pushNamed(context, '/findashboard');
+                        },
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.local_drink),
+                        title: Text('Crops'),
+                        onTap: () {
+                          Navigator.pushNamed(context, '/feilds');
                         },
                       ),
                     ],

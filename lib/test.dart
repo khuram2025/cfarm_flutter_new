@@ -8,7 +8,7 @@ import '../widgets/animalListCard.dart';
 import 'AnimalDetail.dart';
 import 'animalFilterScreen.dart';
 
-const String baseUrl = 'http://34.207.117.85:8001';
+const String baseUrl = 'http://farmapp.channab.com';
 
 class AnimalListMobilePage extends StatefulWidget {
   const AnimalListMobilePage({Key? key}) : super(key: key);

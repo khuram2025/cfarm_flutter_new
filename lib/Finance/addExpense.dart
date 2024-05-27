@@ -81,7 +81,7 @@ class _TransactionEntryScreenState extends State<TransactionEntryScreen> with Si
     if (_formKey.currentState!.validate()) {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://34.207.117.85:8001/erp/api/expenses/create/'),
+        Uri.parse('http://farmapp.channab.com/erp/api/expenses/create/'),
       );
 
       request.headers['Authorization'] = 'Token $token';
@@ -113,7 +113,7 @@ class _TransactionEntryScreenState extends State<TransactionEntryScreen> with Si
     if (_formKey.currentState!.validate()) {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://34.207.117.85:8001/erp/api/income/create/'),
+        Uri.parse('http://farmapp.channab.com/erp/api/income/create/'),
       );
 
       request.headers['Authorization'] = 'Token $token';

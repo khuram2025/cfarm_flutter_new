@@ -46,8 +46,8 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     String apiUrl = widget.isIncome
-        ? 'http://34.207.117.85:8001/erp/api/income/'
-        : 'http://34.207.117.85:8001/erp/api/expenses/';
+        ? 'http://farmapp.channab.com/erp/api/income/'
+        : 'http://farmapp.channab.com/erp/api/expenses/';
 
     final response = await http.get(
       Uri.parse(apiUrl),
