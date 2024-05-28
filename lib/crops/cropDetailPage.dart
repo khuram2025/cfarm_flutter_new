@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'taskListPage.dart';
 import '../home/customDrawer.dart';
 import '../models/fields.dart';
 import '../widgets/CropActivityCard.dart';
@@ -27,7 +28,7 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _activityTabController = TabController(length: 2, vsync: this);
     fetchCropActivities();
   }
@@ -76,13 +77,15 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
     );
 
     if (response.statusCode == 200) {
+      setState(() {
+        fetchCropActivities();
+      });
       print('Activity status updated successfully');
     } else {
       print('Failed to update activity status with status code: ${response.statusCode}');
       print('Response body: ${response.body}');
     }
   }
-
 
   List<Widget> _buildTabs() {
     return [
@@ -91,6 +94,7 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
       Tab(text: 'Notes'),
       Tab(text: 'Harvesting'),
       Tab(text: 'Gallery'),
+      Tab(text: 'Tasks'),
     ];
   }
 
@@ -108,6 +112,7 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
       _buildNotesTab(),
       _buildHarvestingTab(),
       _buildGalleryTab(),
+      _buildTasksTab(),
     ];
   }
 
@@ -147,7 +152,7 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
   }
 
   Widget _buildUpcomingActivitiesTab() {
-    final upcomingActivities = activities.where((activity) => activity.status == 'upcoming').toList();
+    final upcomingActivities = activities.where((activity) => activity.status == 'pending').toList();
 
     return upcomingActivities.isEmpty
         ? Center(child: Text('No upcoming activities for this crop'))
@@ -164,7 +169,7 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
   }
 
   Widget _buildPreviousActivitiesTab() {
-    final previousActivities = activities.where((activity) => activity.status != 'upcoming').toList();
+    final previousActivities = activities.where((activity) => activity.status != 'pending').toList();
 
     return previousActivities.isEmpty
         ? Center(child: Text('No previous activities for this crop'))
@@ -198,6 +203,10 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
     );
   }
 
+  Widget _buildTasksTab() {
+    return TaskListPage(cropId: widget.crop.id);
+  }
+
   Future<void> _deleteCrop() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
@@ -227,7 +236,7 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
     return Scaffold(
       drawer: CustomDrawer(),
       body: DefaultTabController(
-        length: 5,
+        length: 6,
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
@@ -323,4 +332,3 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
     );
   }
 }
-

@@ -45,7 +45,7 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
 
     if (_selectedEmployee != null && _selectedComponentId != null && _amountController.text.isNotEmpty) {
       final response = await http.post(
-        Uri.parse('http://192.168.8.153/accounts/api/add-salary-transaction/'),
+        Uri.parse('http://farmapp.channab.com/accounts/api/add-salary-transaction/'),
         headers: {
           'Authorization': 'Token $token',
           'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('auth_token');
     final response = await http.get(
-      Uri.parse('http://192.168.8.153/accounts/api/active-employees/'),
+      Uri.parse('http://farmapp.channab.com/accounts/api/active-employees/'),
       headers: {
         'Authorization': 'Token $token',
       },
@@ -161,7 +161,7 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('auth_token');
     final response = await http.get(
-      Uri.parse('http://192.168.8.153/accounts/api/salary-components/$memberId/'),
+      Uri.parse('http://farmapp.channab.com/accounts/api/salary-components/$memberId/'),
       headers: {
         'Authorization': 'Token $token',
       },
