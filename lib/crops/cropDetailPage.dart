@@ -76,12 +76,13 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
     );
 
     if (response.statusCode == 200) {
-      fetchCropActivities(); // Refresh the activities
+      print('Activity status updated successfully');
     } else {
       print('Failed to update activity status with status code: ${response.statusCode}');
       print('Response body: ${response.body}');
     }
   }
+
 
   List<Widget> _buildTabs() {
     return [
