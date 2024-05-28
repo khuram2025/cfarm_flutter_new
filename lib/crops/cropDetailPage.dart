@@ -19,20 +19,23 @@ class CropDetailPage extends StatefulWidget {
   _CropDetailPageState createState() => _CropDetailPageState();
 }
 
-class _CropDetailPageState extends State<CropDetailPage> with SingleTickerProviderStateMixin {
+class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStateMixin {
   late TabController _tabController;
+  late TabController _activityTabController;
   List<CropActivity> activities = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
+    _activityTabController = TabController(length: 2, vsync: this);
     fetchCropActivities();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _activityTabController.dispose();
     super.dispose();
   }
 
@@ -59,6 +62,27 @@ class _CropDetailPageState extends State<CropDetailPage> with SingleTickerProvid
     }
   }
 
+  Future<void> updateActivityStatus(int activityId, String status) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('auth_token');
+
+    final response = await http.patch(
+      Uri.parse('$baseUrl/crops/api/activities/$activityId/status/'),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Token $token",
+      },
+      body: json.encode({'status': status}),
+    );
+
+    if (response.statusCode == 200) {
+      fetchCropActivities(); // Refresh the activities
+    } else {
+      print('Failed to update activity status with status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
+  }
+
   List<Widget> _buildTabs() {
     return [
       Tab(text: 'Info'),
@@ -66,6 +90,13 @@ class _CropDetailPageState extends State<CropDetailPage> with SingleTickerProvid
       Tab(text: 'Notes'),
       Tab(text: 'Harvesting'),
       Tab(text: 'Gallery'),
+    ];
+  }
+
+  List<Widget> _buildActivityTabs() {
+    return [
+      Tab(text: 'Upcoming'),
+      Tab(text: 'Previous'),
     ];
   }
 
@@ -79,6 +110,13 @@ class _CropDetailPageState extends State<CropDetailPage> with SingleTickerProvid
     ];
   }
 
+  List<Widget> _buildActivityTabViews() {
+    return [
+      _buildUpcomingActivitiesTab(),
+      _buildPreviousActivitiesTab(),
+    ];
+  }
+
   Widget _buildInfoTab() {
     return Center(
       child: Text('Crop Info: ${widget.crop.name}'),
@@ -86,13 +124,57 @@ class _CropDetailPageState extends State<CropDetailPage> with SingleTickerProvid
   }
 
   Widget _buildCropsActivityTab() {
-    return activities.isEmpty
-        ? Center(child: Text('No activities available for this crop'))
+    return Column(
+      children: [
+        TabBar(
+          controller: _activityTabController,
+          tabs: _buildActivityTabs(),
+          labelColor: Colors.white,
+          unselectedLabelColor: Color(0xFF0DA487),
+          indicator: BoxDecoration(
+            color: Color(0xFF0DA487),
+          ),
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _activityTabController,
+            children: _buildActivityTabViews(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUpcomingActivitiesTab() {
+    final upcomingActivities = activities.where((activity) => activity.status == 'upcoming').toList();
+
+    return upcomingActivities.isEmpty
+        ? Center(child: Text('No upcoming activities for this crop'))
         : ListView.builder(
-      itemCount: activities.length,
+      itemCount: upcomingActivities.length,
       itemBuilder: (context, index) {
-        final activity = activities[index];
-        return CropActivityCard(activity: activity);
+        final activity = upcomingActivities[index];
+        return CropActivityCard(
+          activity: activity,
+          onUpdateStatus: updateActivityStatus,
+        );
+      },
+    );
+  }
+
+  Widget _buildPreviousActivitiesTab() {
+    final previousActivities = activities.where((activity) => activity.status != 'upcoming').toList();
+
+    return previousActivities.isEmpty
+        ? Center(child: Text('No previous activities for this crop'))
+        : ListView.builder(
+      itemCount: previousActivities.length,
+      itemBuilder: (context, index) {
+        final activity = previousActivities[index];
+        return CropActivityCard(
+          activity: activity,
+          onUpdateStatus: updateActivityStatus,
+        );
       },
     );
   }
@@ -240,3 +322,4 @@ class _CropDetailPageState extends State<CropDetailPage> with SingleTickerProvid
     );
   }
 }
+

@@ -8,6 +8,7 @@ class CropActivity {
   final String description;
   final String date;
   final String recurrence;
+  final String status;
 
   CropActivity({
     required this.id,
@@ -15,6 +16,7 @@ class CropActivity {
     required this.description,
     required this.date,
     required this.recurrence,
+    required this.status,
   });
 
   factory CropActivity.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,7 @@ class CropActivity {
       description: json['description'],
       date: json['date'],
       recurrence: json['recurrence'],
+      status: json['status'],
     );
   }
 
@@ -55,8 +58,9 @@ class CropActivity {
 
 class CropActivityCard extends StatefulWidget {
   final CropActivity activity;
+  final Future<void> Function(int, String) onUpdateStatus;
 
-  const CropActivityCard({Key? key, required this.activity}) : super(key: key);
+  const CropActivityCard({Key? key, required this.activity, required this.onUpdateStatus}) : super(key: key);
 
   @override
   _CropActivityCardState createState() => _CropActivityCardState();
@@ -149,13 +153,13 @@ class _CropActivityCardState extends State<CropActivityCard> {
                               IconButton(
                                 icon: Icon(Icons.check_circle, color: Colors.green, size: 24),
                                 onPressed: () {
-                                  // Handle done action
+                                  widget.onUpdateStatus(widget.activity.id, 'completed');
                                 },
                               ),
                               IconButton(
                                 icon: Icon(Icons.cancel, color: Colors.red, size: 24),
                                 onPressed: () {
-                                  // Handle cancel action
+                                  widget.onUpdateStatus(widget.activity.id, 'canceled');
                                 },
                               ),
                             ],
