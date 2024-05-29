@@ -52,3 +52,33 @@ imagePath: fullImagePath,
 );
 }
 }
+
+
+
+
+
+class AnimalWeightRecord {
+  final String animalTag;
+  final double weightKg;
+  final String date;
+  final String? description;
+
+  AnimalWeightRecord({
+    required this.animalTag,
+    required this.weightKg,
+    required this.date,
+    this.description,
+  });
+
+  factory AnimalWeightRecord.fromJson(Map<String, dynamic> json) {
+    return AnimalWeightRecord(
+      animalTag: json['animal']['tag'],
+      weightKg: double.parse(json['weight_kg']),
+      date: json['date'],
+      description: json['description'],
+    );
+  }
+}
+
+
+

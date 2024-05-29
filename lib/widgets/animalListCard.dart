@@ -41,7 +41,7 @@ class AnimalListCard extends StatelessWidget {
                 image,
                 width: 150,
                 height: 150,
-                fit: BoxFit.cover,
+                fit: BoxFit.fill,
               ),
             ),
             Expanded(

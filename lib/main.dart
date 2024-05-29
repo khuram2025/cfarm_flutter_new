@@ -10,6 +10,7 @@ import 'Finance/addTransaction.dart';
 
 import 'crops/feildsList.dart';
 import 'dairy/AnimalListPage.dart';
+import 'dairy/AnimalsWeightList.dart';
 import 'home/homePage.dart';
 
 void main() async {
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
         '/animals': (context) => AnimalListMobilePage(),
         '/success': (context) => SuccessScreen(),
         '/findashboard': (context) => AnalyticsScreen(),
+        '/animalsweightlist': (context) => AnimalWeightListPage(),
         '/feilds': (context) => FieldListPage(),
 
       },

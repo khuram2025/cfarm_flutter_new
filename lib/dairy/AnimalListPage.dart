@@ -4,13 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../home/customDrawer.dart';
 import '../home/finCustomeAppbar.dart';
-import '../models/animals.dart';
+import '../apis/models.dart';  // Ensure you are importing from the correct file
 import '../widgets/AnimalChipRow.dart';
 import '../widgets/animalListCard.dart';
 import 'AnimalDetail.dart';
 import 'addAnimalPage.dart';
 import 'animalFilterScreen.dart';
-
 
 const String baseUrl = 'http://farmapp.channab.com';
 
@@ -173,7 +172,7 @@ class _AnimalListMobilePageState extends State<AnimalListMobilePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AnimalDetailsPage(animal: animal),
+                        builder: (context) => AnimalDetailPage(animal: animal,),
                       ),
                     );
                   },
