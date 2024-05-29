@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled3/crops/addCrop.dart';
 import '../home/customDrawer.dart';
 import '../models/fields.dart';
-import '../widgets/MediumButton.dart';
 import '../widgets/crop_card.dart';
+import 'feildADD.dart';
 
-const String baseUrl = 'http://192.168.8.153';
+const String baseUrl = 'http://farmapp.channab.com';
 
 class FieldDetailPage extends StatefulWidget {
   final Field field;
@@ -112,7 +113,25 @@ class _FieldDetailPageState extends State<FieldDetailPage> with SingleTickerProv
   }
 
   void _editField() {
-    // Navigate to the edit field page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddFieldPage(fieldId: widget.field.id),
+      ),
+    ).then((_) {
+      setState(() {
+        fetchCrops();
+      });
+    });
+  }
+
+  void _addCrop() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddCropPage(),
+      ),
+    ).then((_) {});
   }
 
   @override
@@ -171,6 +190,17 @@ class _FieldDetailPageState extends State<FieldDetailPage> with SingleTickerProv
                   ),
                   Row(
                     children: [
+                      TextButton(
+                        onPressed: _addCrop,
+                        style: TextButton.styleFrom(
+                          primary: Color(0xFF0DA487),
+                          side: BorderSide(color: Color(0xFF0DA487)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text('Add Crop'),
+                      ),
                       IconButton(
                         icon: FaIcon(FontAwesomeIcons.edit),
                         onPressed: _editField,
@@ -216,6 +246,3 @@ class _FieldDetailPageState extends State<FieldDetailPage> with SingleTickerProv
     );
   }
 }
-
-
-

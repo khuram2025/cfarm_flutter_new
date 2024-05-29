@@ -10,7 +10,7 @@ import '../models/fields.dart';
 import '../widgets/CropActivityCard.dart';
 import '../widgets/crop_card.dart';
 
-const String baseUrl = 'http://192.168.8.153';
+const String baseUrl = 'http://farmapp.channab.com';
 
 class CropDetailPage extends StatefulWidget {
   final Crop crop;

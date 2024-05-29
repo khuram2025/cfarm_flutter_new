@@ -7,7 +7,7 @@ import 'Finance/transactionFilter.dart';
 import 'Finance/transactionsScreen.dart';
 import 'accounts/login.dart';
 import 'Finance/addTransaction.dart';
-import 'crops/addFeilds.dart';
+
 import 'crops/feildsList.dart';
 import 'dairy/AnimalListPage.dart';
 import 'home/homePage.dart';
