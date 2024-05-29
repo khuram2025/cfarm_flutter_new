@@ -5,9 +5,10 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/fields.dart';
+import 'feildADD.dart';
 import 'feildDetailPage.dart';
 
-const String baseUrl = 'http://farmapp.channab.com';
+const String baseUrl = 'http://192.168.8.153';
 
 class FieldListPage extends StatefulWidget {
   @override
@@ -56,28 +57,37 @@ class _FieldListPageState extends State<FieldListPage> {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              // Navigate to add field page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddFieldPage()),
+              ).then((_) {
+                fetchFields(); // Refresh the field list after returning from AddFieldPage
+              });
             },
           ),
         ],
       ),
-      body: ListView.builder(
+      body: fields.isEmpty
+          ? Center(child: Text('No fields available'))
+          : ListView.builder(
         itemCount: fields.length,
         itemBuilder: (context, index) {
           final field = fields[index];
-          return FieldCard(field: field);
+          return FieldCard(
+            field: field,
+            onFieldUpdated: fetchFields, // Pass the callback to refresh the list
+          );
         },
       ),
     );
   }
 }
 
-
-
 class FieldCard extends StatelessWidget {
   final Field field;
+  final VoidCallback onFieldUpdated; // Callback to refresh the list
 
-  const FieldCard({Key? key, required this.field}) : super(key: key);
+  const FieldCard({Key? key, required this.field, required this.onFieldUpdated}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -134,12 +144,19 @@ class FieldCard extends StatelessWidget {
                               IconButton(
                                 icon: const FaIcon(FontAwesomeIcons.edit),
                                 onPressed: () {
-                                  // Handle edit action for this field
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AddFieldPage(fieldId: field.id),
+                                    ),
+                                  ).then((_) {
+                                    onFieldUpdated(); // Refresh the field list after returning from AddFieldPage
+                                  });
                                 },
                                 iconSize: 14,
                                 color: Color(0xFF0DA487),
-                                padding: EdgeInsets.zero, // Remove any padding
-                                constraints: BoxConstraints(), // Remove default constraints
+                                padding: EdgeInsets.zero,
+                                constraints: BoxConstraints(),
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete_forever_rounded),
@@ -221,3 +238,5 @@ class MediumButton extends StatelessWidget {
     );
   }
 }
+
+

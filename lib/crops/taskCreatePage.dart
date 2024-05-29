@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String baseUrl = 'http://farmapp.channab.com';
+const String baseUrl = 'http://192.168.8.153';
 
 class CreateTaskPage extends StatefulWidget {
   final int cropId;

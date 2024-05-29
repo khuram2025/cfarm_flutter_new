@@ -1,44 +1,70 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:image/image.dart' as img;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../widgets/ErrorDialog.dart';
-import '../widgets/SuccessDialog.dart';
 
-
-void main() {
-  runApp(MaterialApp(
-    home: AddFieldPage(),
-  ));
-}
+const String baseUrl = 'http://farmapp.channab.com';
 
 class AddFieldPage extends StatefulWidget {
+  final int? fieldId;  // Field ID for editing, null for creating
+
+  const AddFieldPage({Key? key, this.fieldId}) : super(key: key);
+
   @override
   _AddFieldPageState createState() => _AddFieldPageState();
 }
 
 class _AddFieldPageState extends State<AddFieldPage> {
+  final _formKey = GlobalKey<FormState>();
   TextEditingController _nameController = TextEditingController();
   TextEditingController _areaController = TextEditingController();
   File? _selectedFile;
   bool _isUploading = false;
-  final _formKey = GlobalKey<FormState>();
+  bool _isEditing = false;
 
   @override
   void initState() {
     super.initState();
+    if (widget.fieldId != null) {
+      _isEditing = true;
+      fetchFieldDetails(widget.fieldId!);
+    }
+  }
+
+  Future<void> fetchFieldDetails(int fieldId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('auth_token');
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/crops/api/fields/$fieldId/'),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Token $token",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final fieldData = json.decode(response.body);
+      setState(() {
+        _nameController.text = fieldData['name'];
+        _areaController.text = fieldData['area'].toString();
+        // Assuming you handle image separately, you can load image URL here if needed
+      });
+    } else {
+      print('Failed to load field details with status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
   }
 
   Future<void> _pickFile() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() async {
-        _selectedFile = await _compressImage(File(pickedFile.path));
+      setState(() {
+        _selectedFile = File(pickedFile.path);
       });
     }
   }
@@ -46,22 +72,13 @@ class _AddFieldPageState extends State<AddFieldPage> {
   Future<void> _takePicture() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
-      setState(() async {
-        _selectedFile = await _compressImage(File(pickedFile.path));
+      setState(() {
+        _selectedFile = File(pickedFile.path);
       });
     }
   }
 
-  Future<File> _compressImage(File file) async {
-    final bytes = await file.readAsBytes();
-    final image = img.decodeImage(bytes)!;
-    final resizedImage = img.copyResize(image, width: 800);
-    final compressedBytes = img.encodeJpg(resizedImage, quality: 70);
-    final compressedFile = File(file.path)..writeAsBytesSync(compressedBytes);
-    return compressedFile;
-  }
-
-  Future<void> _createField() async {
+  Future<void> _saveField() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('auth_token');
 
@@ -70,9 +87,13 @@ class _AddFieldPageState extends State<AddFieldPage> {
         _isUploading = true;
       });
 
+      final url = widget.fieldId == null
+          ? '$baseUrl/crops/api/fields/create/'
+          : '$baseUrl/crops/api/fields/${widget.fieldId}/edit/';
+
       final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('http://192.168.8.153/api/fields/create/'),
+        widget.fieldId == null ? 'POST' : 'PATCH',
+        Uri.parse(url),
       );
 
       request.headers['Authorization'] = 'Token $token';
@@ -94,10 +115,10 @@ class _AddFieldPageState extends State<AddFieldPage> {
       final responseBody = await response.stream.bytesToString();
       final responseJson = json.decode(responseBody);
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 201 || response.statusCode == 200) {
         _showSuccessDialog();
       } else {
-        String errorMessage = responseJson['error'] ?? 'Failed to create field';
+        String errorMessage = responseJson['error'] ?? 'Failed to save field';
         _showErrorDialog(errorMessage);
       }
     }
@@ -107,12 +128,55 @@ class _AddFieldPageState extends State<AddFieldPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return SuccessDialog(
-          message: "Your field has been created successfully.",
-          onConfirm: () {
-            Navigator.of(context).pop();
-            Navigator.of(context).pop(); // Go back to the previous screen
-          },
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          child: Container(
+            height: 330,
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.check_circle, color: Color(0xFF0DA487), size: 100),
+                SizedBox(height: 20),
+                Text(
+                  "Success",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Your field has been ${_isEditing ? 'updated' : 'created'} successfully.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop(); // Go back to the previous screen
+                  },
+                  child: Text(
+                    'Done',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF0DA487),
+                    minimumSize: Size(double.infinity, 50),
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -122,8 +186,17 @@ class _AddFieldPageState extends State<AddFieldPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return ErrorDialog(
-          message: message,
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
         );
       },
     );
@@ -134,7 +207,7 @@ class _AddFieldPageState extends State<AddFieldPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Add Field',
+          _isEditing ? 'Edit Field' : 'Add Field',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -251,7 +324,7 @@ class _AddFieldPageState extends State<AddFieldPage> {
               TextFormField(
                 controller: _areaController,
                 decoration: InputDecoration(
-                  labelText: 'Area (acres)',
+                  labelText: 'Field Area',
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFF0DA487)),
                   ),
@@ -267,14 +340,14 @@ class _AddFieldPageState extends State<AddFieldPage> {
                 style: TextStyle(color: Color(0xFF0DA487)),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter area';
+                    return 'Please enter field area';
                   }
                   return null;
                 },
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _createField,
+                onPressed: _saveField,
                 child: Text(
                   'Save',
                   style: TextStyle(

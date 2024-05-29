@@ -8,7 +8,7 @@ import '../models/fields.dart';
 import '../widgets/MediumButton.dart';
 import '../widgets/crop_card.dart';
 
-const String baseUrl = 'http://farmapp.channab.com';
+const String baseUrl = 'http://192.168.8.153';
 
 class FieldDetailPage extends StatefulWidget {
   final Field field;
