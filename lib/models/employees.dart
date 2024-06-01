@@ -26,7 +26,7 @@ class Employee {
 
   factory Employee.fromJson(Map<String, dynamic> json) {
     return Employee(
-      id: json['id'],
+      id: json['employee_id'] ?? 0,  // Use employee_id from JSON
       firstName: json['first_name'] ?? '',
       lastName: json['last_name'] ?? '',
       mobile: json['mobile'] ?? '',
