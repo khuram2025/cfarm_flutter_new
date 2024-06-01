@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled3/accounts/widgets/employeeInfoTab.dart';
+import '../Finance/addSalaryTransaction.dart';
 import '../home/customDrawer.dart';
 import '../models/employees.dart';
 import 'employeeTaskList.dart';
@@ -120,6 +121,32 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
     // Implement edit employee functionality
   }
 
+  void _handleAddButtonPressed() {
+    final currentIndex = _tabController.index;
+    if (currentIndex == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddSalaryTransactionScreen(initialEmployeeId: widget.employee.id),
+        ),
+      );
+    }
+  }
+
+  String _getAddButtonText() {
+    final currentIndex = _tabController.index;
+    switch (currentIndex) {
+      case 1:
+        return 'Add Components';
+      case 2:
+        return 'Add Salary Transaction';
+      case 3:
+        return 'Add Task';
+      default:
+        return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,6 +203,21 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
                   ),
                   Row(
                     children: [
+                      if (_tabController.index != 0)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: ElevatedButton(
+                            onPressed: _handleAddButtonPressed,
+                            child: Text(_getAddButtonText()),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Color(0xFF0DA487), backgroundColor: Colors.white,
+                              side: BorderSide(color: Color(0xFF0DA487)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
                       IconButton(
                         icon: FaIcon(FontAwesomeIcons.edit),
                         onPressed: _editEmployee,
@@ -201,6 +243,9 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
                     color: Color(0xFF0DA487),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
+                  onTap: (index) {
+                    setState(() {});
+                  },
                 ),
               ),
               Expanded(

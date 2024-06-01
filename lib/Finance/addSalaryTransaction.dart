@@ -5,6 +5,10 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddSalaryTransactionScreen extends StatefulWidget {
+  final int? initialEmployeeId;
+
+  const AddSalaryTransactionScreen({Key? key, this.initialEmployeeId}) : super(key: key);
+
   @override
   _AddSalaryTransactionScreenState createState() => _AddSalaryTransactionScreenState();
 }
@@ -23,6 +27,10 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
     super.initState();
     _dateController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
     _employeesFuture = fetchEmployees();
+    if (widget.initialEmployeeId != null) {
+      _selectedEmployee = widget.initialEmployeeId.toString();
+      _componentsFuture = fetchSalaryComponents(widget.initialEmployeeId!);
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -138,9 +146,6 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      data.forEach((e) {
-        print('Profile ID: ${e['id']}, Employee Name: ${e['first_name']} ${e['last_name']}, CustomUser ID: ${e['user_id']}');
-      });
       return data.map((e) {
         if (e['user_id'] != null) {
           return {'id': e['user_id'], 'name': '${e['first_name']} ${e['last_name']}'};
@@ -153,11 +158,7 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
     }
   }
 
-
-
-
   Future<List<Map<String, dynamic>>> fetchSalaryComponents(int memberId) async {
-    print('Fetching salary components for CustomUser ID: $memberId');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('auth_token');
     final response = await http.get(
@@ -169,15 +170,11 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      data.forEach((e) {
-        print('Component Name: ${e['name']}, Component ID: ${e['id']}');
-      });
       return data.map((e) => {'id': e['id'], 'name': e['name']}).toList();
     } else {
       throw Exception('Failed to load salary components');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +217,7 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
                   } else {
                     final employees = snapshot.data!;
                     return DropdownButtonFormField(
-                      value: _selectedEmployee,
+                      value: _selectedEmployee ?? (widget.initialEmployeeId?.toString()),
                       decoration: InputDecoration(
                         labelText: 'Select Employee',
                         border: OutlineInputBorder(
@@ -258,9 +255,6 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
                   }
                 },
               ),
-
-
-
               SizedBox(height: 10),
               if (_componentsFuture != null)
                 FutureBuilder<List<Map<String, dynamic>>>(
