@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/salary_transaction.dart';
 
 class AddSalaryTransactionScreen extends StatefulWidget {
   final int? initialEmployeeId;
+  final SalaryTransaction? transaction;
 
-  const AddSalaryTransactionScreen({Key? key, this.initialEmployeeId}) : super(key: key);
+  const AddSalaryTransactionScreen({Key? key, this.initialEmployeeId, this.transaction}) : super(key: key);
 
   @override
   _AddSalaryTransactionScreenState createState() => _AddSalaryTransactionScreenState();
@@ -27,9 +29,15 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
     super.initState();
     _dateController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
     _employeesFuture = fetchEmployees();
-    if (widget.initialEmployeeId != null) {
-      _selectedEmployee = widget.initialEmployeeId.toString();
-      _componentsFuture = fetchSalaryComponents(widget.initialEmployeeId!);
+    if (widget.initialEmployeeId != null || widget.transaction != null) {
+      _selectedEmployee = (widget.initialEmployeeId ?? widget.transaction?.farmMemberId).toString();
+      _componentsFuture = fetchSalaryComponents(widget.initialEmployeeId ?? widget.transaction!.farmMemberId);
+      _selectedComponentId = widget.transaction?.componentId;
+      if (widget.transaction != null) {
+        _dateController.text = DateFormat('dd/MM/yyyy').format(DateTime.parse(widget.transaction!.transactionDate));
+        _amountController.text = widget.transaction!.amountPaid.toString();
+        _noteController.text = widget.transaction!.description ?? '';
+      }
     }
   }
 
@@ -47,31 +55,38 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
     }
   }
 
-  Future<void> _createSalaryTransaction() async {
+  Future<void> _createOrUpdateSalaryTransaction() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('auth_token');
 
     if (_selectedEmployee != null && _selectedComponentId != null && _amountController.text.isNotEmpty) {
-      final response = await http.post(
-        Uri.parse('http://farmapp.channab.com/accounts/api/add-salary-transaction/'),
-        headers: {
+      final url = widget.transaction == null
+          ? 'http://farmapp.channab.com/accounts/api/add-salary-transaction/'
+          : 'http://farmapp.channab.com/accounts/api/edit-salary-transaction/${widget.transaction!.id}/';
+
+      final method = widget.transaction == null ? 'POST' : 'PUT';
+
+      final request = http.Request(method, Uri.parse(url))
+        ..headers.addAll({
           'Authorization': 'Token $token',
           'Content-Type': 'application/json',
-        },
-        body: json.encode({
+        })
+        ..body = json.encode({
           'farm_member': _selectedEmployee,
           'component': _selectedComponentId,
           'amount_paid': _amountController.text,
           'transaction_date': DateFormat('yyyy-MM-dd').format(DateFormat('dd/MM/yyyy').parse(_dateController.text)),
           'description': _noteController.text,
-        }),
-      );
+        });
 
-      if (response.statusCode == 201) {
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
         _showSuccessDialog();
       } else {
-        print("Failed to create salary transaction: ${response.body}");
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to create salary transaction')));
+        print("Failed to create or update salary transaction: $responseBody");
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to create or update salary transaction')));
       }
     }
   }
@@ -374,7 +389,7 @@ class _AddSalaryTransactionScreenState extends State<AddSalaryTransactionScreen>
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _createSalaryTransaction,
+                onPressed: _createOrUpdateSalaryTransaction,
                 child: Text(
                   'Save',
                   style: TextStyle(

@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/salary_transaction.dart';
+import '../../Finance/addSalaryTransaction.dart';
 
 class SalaryTransactionPage extends StatefulWidget {
   final int employeeId;
@@ -89,6 +90,44 @@ class _SalaryTransactionPageState extends State<SalaryTransactionPage> {
     });
   }
 
+  void _editTransaction(SalaryTransaction transaction) async {
+    // Navigate to AddSalaryTransactionScreen with transaction data
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddSalaryTransactionScreen(
+          initialEmployeeId: widget.employeeId,
+          transaction: transaction,
+        ),
+      ),
+    );
+    // Refresh transactions after editing
+    setState(() {
+      transactionsFuture = fetchSalaryTransactions();
+    });
+  }
+
+  void _deleteTransaction(int transactionId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('auth_token');
+
+    final response = await http.delete(
+      Uri.parse('http://farmapp.channab.com/accounts/api/delete-salary-transaction/$transactionId/'),
+      headers: {
+        "Authorization": "Token $token",
+      },
+    );
+
+    if (response.statusCode == 204) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Transaction deleted successfully')));
+      setState(() {
+        transactionsFuture = fetchSalaryTransactions();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete transaction')));
+    }
+  }
+
   void _showTransactionDetails(SalaryTransaction transaction) {
     showDialog(
       context: context,
@@ -110,6 +149,20 @@ class _SalaryTransactionPageState extends State<SalaryTransactionPage> {
               child: Text('Close'),
               onPressed: () {
                 Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Edit'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _editTransaction(transaction);
+              },
+            ),
+            TextButton(
+              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteTransaction(transaction.id);
               },
             ),
           ],
