@@ -1,22 +1,25 @@
 class SalaryTransaction {
   final int id;
-  final String component; // Changed to String to hold the component's name
-  final double amount_paid;
-  final String transaction_date;
+  final String componentName;
+  final double amountPaid;
+  final String transactionDate;
+  final String? description;
 
   SalaryTransaction({
     required this.id,
-    required this.component,
-    required this.amount_paid,
-    required this.transaction_date,
+    required this.componentName,
+    required this.amountPaid,
+    required this.transactionDate,
+    this.description,
   });
 
   factory SalaryTransaction.fromJson(Map<String, dynamic> json) {
     return SalaryTransaction(
       id: json['id'],
-      component: json['component'], // Assuming this is the name of the component
-      amount_paid: json['amount_paid'].toDouble(),
-      transaction_date: json['transaction_date'],
+      componentName: json['component_name'] ?? '',
+      amountPaid: double.parse(json['amount_paid'].toString()),
+      transactionDate: json['transaction_date'],
+      description: json['description'],
     );
   }
 }

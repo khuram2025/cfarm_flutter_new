@@ -8,6 +8,11 @@ class EmployeeInfoTable extends StatelessWidget {
   final String joiningDate;
   final String endDate;
   final String status;
+  final String monthlySalary;
+  final String totalSalaryReceived;
+  final String expectedSalaryTillNow;
+  final String remainingSalary;
+  final String totalMonthlySalary;
 
   const EmployeeInfoTable({
     Key? key,
@@ -18,6 +23,11 @@ class EmployeeInfoTable extends StatelessWidget {
     required this.joiningDate,
     required this.endDate,
     required this.status,
+    required this.monthlySalary,
+    required this.totalSalaryReceived,
+    required this.expectedSalaryTillNow,
+    required this.remainingSalary,
+    required this.totalMonthlySalary,
   }) : super(key: key);
 
   @override
@@ -40,12 +50,24 @@ class EmployeeInfoTable extends StatelessWidget {
           _buildTableRow('Joining Date', joiningDate),
           _buildTableRow('End Date', endDate),
           _buildTableRow('Status', _capitalize(status)),
+          _buildTableRow('Monthly Salary', totalMonthlySalary),
+          _buildTableRow('Salary Received', totalSalaryReceived),
+          _buildTableRow('Salary Till Now', expectedSalaryTillNow),
+          _buildTableRow('Remaining Salary', remainingSalary, isRemainingSalary: true),
         ],
       ),
     );
   }
 
-  TableRow _buildTableRow(String label, String value) {
+  TableRow _buildTableRow(String label, String value, {bool isRemainingSalary = false}) {
+    Color textColor;
+    if (isRemainingSalary) {
+      double remainingSalaryValue = double.tryParse(value) ?? 0.0;
+      textColor = remainingSalaryValue >= 0 ? Colors.green : Colors.red;
+    } else {
+      textColor = Colors.black;
+    }
+
     return TableRow(
       children: [
         Container(
@@ -55,7 +77,7 @@ class EmployeeInfoTable extends StatelessWidget {
             label,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: 14,
             ),
           ),
         ),
@@ -64,7 +86,8 @@ class EmployeeInfoTable extends StatelessWidget {
           child: Text(
             value,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
+              color: textColor,
             ),
           ),
         ),
