@@ -196,19 +196,6 @@ class _SalaryTransactionPageState extends State<SalaryTransactionPage> {
                     ),
                   ),
                 ),
-                Divider(),
-                ListTile(
-                  title: Text('Employee Monthly Salary: ${salaryStatus['monthly_salary'] ?? 'N/A'}'),
-                ),
-                ListTile(
-                  title: Text('Employee Salary Received: ${salaryStatus['total_salary_received'] ?? 'N/A'}'),
-                ),
-                ListTile(
-                  title: Text('Salary till now: ${salaryStatus['expected_salary_till_now'] ?? 'N/A'}'),
-                ),
-                ListTile(
-                  title: Text('Remaining Salary: ${salaryStatus['remaining_salary'] ?? 'N/A'}'),
-                ),
               ],
             );
           }
