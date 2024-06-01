@@ -130,7 +130,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         appBar: CustomAppBar(
           title: widget.isIncome ? 'Income List' : 'Expense List',
         ),
@@ -243,11 +243,11 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
             children: [
               Text(
                 category,
-                style: Theme.of(context).textTheme.subtitle1,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
               Text(
                 date,
-                style: Theme.of(context).textTheme.caption,
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               if (description != null) Text(description),
             ],
@@ -261,7 +261,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
               ),
               Text(
                 amount,
-                style: Theme.of(context).textTheme.bodyText1?.copyWith(
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: widget.isIncome ? Color(0xFF0DA487) : Color(0xFFEE8B60),
                 ),
@@ -278,7 +278,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
               const SizedBox(width: 10),
               Icon(
                 Icons.delete_sharp,
-                color: Theme.of(context).errorColor,
+                color: Theme.of(context).colorScheme.error,
                 size: 24,
               ),
             ],

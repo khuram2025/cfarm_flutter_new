@@ -9,6 +9,8 @@ import 'models.dart';
 class ApiService {
   final String baseUrl = "http://farmapp.channab.com";
 
+
+
   Future<Map<String, dynamic>?> loginUser(String mobileNumber, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/accounts/api/login/'),
@@ -71,8 +73,6 @@ class ApiService {
       throw Exception('Failed to load expenses with status code: ${response.statusCode}');
     }
   }
-
-
 
   Future<List<Animal>> fetchAnimalsByType(String type) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

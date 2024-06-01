@@ -141,6 +141,13 @@ class CustomDrawer extends StatelessWidget {
                       ),
                       ListTile(
                         leading: Icon(Icons.local_drink),
+                        title: Text('Employees'),
+                        onTap: () {
+                          Navigator.pushNamed(context, '/employees');
+                        },
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.local_drink),
                         title: Text('Crops'),
                         onTap: () {
                           Navigator.pushNamed(context, '/feilds');

@@ -225,7 +225,7 @@ class _TransactionPageWidgetState extends State<TransactionPageWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         appBar: FinCustomAppBar(
           title: widget.isIncome ? 'Income' : 'Expense',
           onAddTransaction: _handleAddTransaction,

@@ -1,34 +1,31 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:untitled3/crops/addCrop.dart';
+import 'package:untitled3/accounts/widgets/employeeInfoTab.dart';
 import '../home/customDrawer.dart';
-import '../models/fields.dart';
-import '../widgets/crop_card.dart';
-import 'feildADD.dart';
+import '../models/employees.dart';
+import 'employeeTaskList.dart';
+import 'widgets/salary_tab_page.dart';
 
 const String baseUrl = 'http://farmapp.channab.com';
 
-class FieldDetailPage extends StatefulWidget {
-  final Field field;
+class EmployeeDetailPage extends StatefulWidget {
+  final Employee employee;
 
-  const FieldDetailPage({Key? key, required this.field}) : super(key: key);
+  const EmployeeDetailPage({Key? key, required this.employee}) : super(key: key);
 
   @override
-  _FieldDetailPageState createState() => _FieldDetailPageState();
+  _EmployeeDetailPageState createState() => _EmployeeDetailPageState();
 }
 
-class _FieldDetailPageState extends State<FieldDetailPage> with SingleTickerProviderStateMixin {
+class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProviderStateMixin {
   late TabController _tabController;
-  List<Crop> crops = [];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    fetchCrops();
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -37,67 +34,56 @@ class _FieldDetailPageState extends State<FieldDetailPage> with SingleTickerProv
     super.dispose();
   }
 
-  Future<void> fetchCrops() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('auth_token');
-
-    final response = await http.get(
-      Uri.parse('$baseUrl/crops/api/fields/${widget.field.id}/crops/'),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Token $token",
-      },
-    );
-
-    if (response.statusCode == 200) {
-      List<dynamic> cropsJson = json.decode(response.body);
-      setState(() {
-        crops = cropsJson.map((json) => Crop.fromJson(json)).toList();
-      });
-    } else {
-      print('Failed to load crops with status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
-    }
-  }
-
   List<Widget> _buildTabs() {
     return [
       Tab(text: 'Info'),
-      Tab(text: 'Crops History'),
+      Tab(text: 'Salary'),
+      Tab(text: 'Transactions'),
+      Tab(text: 'Tasks'),
     ];
   }
 
   List<Widget> _buildTabViews() {
     return [
       _buildInfoTab(),
-      _buildCropsHistoryTab(),
+      SalaryTabPage(employeeId: widget.employee.id),
+      _buildTransactionsTab(),
+      _buildTasksTab(),
     ];
   }
 
   Widget _buildInfoTab() {
+    return EmployeeInfoTable(
+      name: '${widget.employee.firstName} ${widget.employee.lastName}',
+      mobileNumber: widget.employee.mobile,
+      email: widget.employee.email,
+      role: widget.employee.role ?? 'N/A',
+      joiningDate: widget.employee.joiningDate ?? 'N/A',
+      endDate: widget.employee.endDate ?? 'N/A',
+      status: widget.employee.status ?? 'N/A',
+    );
+  }
+
+  Widget _buildSalaryTab() {
+    return SalaryTabPage(employeeId: widget.employee.id);
+  }
+
+  Widget _buildTransactionsTab() {
     return Center(
-      child: Text('Field Info: ${widget.field.name}'),
+      child: Text('Transactions for Employee: ${widget.employee.firstName} ${widget.employee.lastName}'),
     );
   }
 
-  Widget _buildCropsHistoryTab() {
-    return crops.isEmpty
-        ? Center(child: Text('No crops history available for this field'))
-        : ListView.builder(
-      itemCount: crops.length,
-      itemBuilder: (context, index) {
-        final crop = crops[index];
-        return CropCard(crop: crop);
-      },
-    );
+  Widget _buildTasksTab() {
+    return TaskListPage(employeeId: widget.employee.id); // Assuming you have a TaskListPage that takes employeeId
   }
 
-  Future<void> _deleteField() async {
+  Future<void> _deleteEmployee() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
 
     final response = await http.delete(
-      Uri.parse('$baseUrl/crops/api/fields/${widget.field.id}/'),
+      Uri.parse('$baseUrl/accounts/api/employees/${widget.employee.id}/'),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Token $token",
@@ -105,33 +91,15 @@ class _FieldDetailPageState extends State<FieldDetailPage> with SingleTickerProv
     );
 
     if (response.statusCode == 204) {
-      Navigator.pop(context, true); // Indicate that the field was deleted
+      Navigator.pop(context, true); // Indicate that the employee was deleted
     } else {
-      print('Failed to delete field with status code: ${response.statusCode}');
+      print('Failed to delete employee with status code: ${response.statusCode}');
       print('Response body: ${response.body}');
     }
   }
 
-  void _editField() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddFieldPage(fieldId: widget.field.id),
-      ),
-    ).then((_) {
-      setState(() {
-        fetchCrops();
-      });
-    });
-  }
-
-  void _addCrop() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddCropPage(),
-      ),
-    ).then((_) {});
+  void _editEmployee() {
+    // Navigate to the edit employee page
   }
 
   @override
@@ -139,7 +107,7 @@ class _FieldDetailPageState extends State<FieldDetailPage> with SingleTickerProv
     return Scaffold(
       drawer: CustomDrawer(),
       body: DefaultTabController(
-        length: 2,
+        length: 4,
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
@@ -150,9 +118,9 @@ class _FieldDetailPageState extends State<FieldDetailPage> with SingleTickerProv
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
-                    widget.field.imageUrl != null
+                    widget.employee.imageUrl != null
                         ? Image.network(
-                      widget.field.imageUrl!,
+                      widget.employee.imageUrl!,
                       fit: BoxFit.cover,
                     )
                         : Container(
@@ -180,7 +148,7 @@ class _FieldDetailPageState extends State<FieldDetailPage> with SingleTickerProv
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      widget.field.name,
+                      '${widget.employee.firstName} ${widget.employee.lastName}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -190,24 +158,14 @@ class _FieldDetailPageState extends State<FieldDetailPage> with SingleTickerProv
                   ),
                   Row(
                     children: [
-                      TextButton(
-                        onPressed: _addCrop,
-                        style: TextButton.styleFrom(
-                          foregroundColor: Color(0xFF0DA487), side: BorderSide(color: Color(0xFF0DA487)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: Text('Add Crop'),
-                      ),
                       IconButton(
                         icon: FaIcon(FontAwesomeIcons.edit),
-                        onPressed: _editField,
+                        onPressed: _editEmployee,
                         color: Color(0xFF0DA487),
                       ),
                       IconButton(
                         icon: Icon(Icons.delete_forever_rounded),
-                        onPressed: _deleteField,
+                        onPressed: _deleteEmployee,
                         color: Colors.red,
                       ),
                     ],

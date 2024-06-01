@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled3/accounts/employeeList.dart';
 import 'Finance/confirmation.dart';
 import 'Finance/finDashbaordScreen.dart';
 import 'Finance/transactionFilter.dart';
@@ -55,6 +56,8 @@ class MyApp extends StatelessWidget {
         '/findashboard': (context) => AnalyticsScreen(),
         '/animalsweightlist': (context) => AnimalWeightListPage(),
         '/feilds': (context) => FieldListPage(),
+        '/employees': (context) => EmployeeListPage(),
+
 
       },
     );
