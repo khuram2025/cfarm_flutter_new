@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../home/customDrawer.dart';
+import '../home/finCustomeAppbar.dart';
 import '../models/employees.dart';
 import 'addEmployee.dart';
 import 'employeeDetail.dart';
@@ -35,9 +37,6 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
       },
     );
 
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}'); // Print the response body
-
     if (response.statusCode == 200) {
       List<dynamic> employeesJson = json.decode(response.body);
       List<Employee> tempEmployees = employeesJson.map((json) {
@@ -52,8 +51,6 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
       setState(() {
         employees = tempEmployees;
       });
-      print('Parsed Employees: $tempEmployees'); // Print the parsed employees
-      print('State Employees: $employees'); // Print the state employees
     } else {
       print('Failed to load employees with status code: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -63,30 +60,25 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Employee List'),
-        backgroundColor: Color(0xFF0DA487),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AddEmployeePage()),
-              ).then((_) {
-                fetchEmployees(); // Refresh the employee list after returning from AddEmployeePage
-              });
-            },
-          ),
-        ],
+      appBar: FinCustomAppBar(
+        title: 'Employees List',
+        onAddTransaction: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddEmployeePage(),
+            ),
+          );
+        }, onFilter: () {  },
+
       ),
+      drawer: CustomDrawer(),
       body: employees.isEmpty
           ? Center(child: Text('No employees available'))
           : ListView.builder(
         itemCount: employees.length,
         itemBuilder: (context, index) {
           final employee = employees[index];
-          print('Building Employee Card for: ${employee.firstName} ${employee.lastName}'); // Add logging
           return EmployeeCard(
             employee: employee,
             onEmployeeUpdated: fetchEmployees, // Pass the callback to refresh the list
@@ -115,30 +107,40 @@ class EmployeeCard extends StatelessWidget {
         );
       },
       child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        elevation: 5,
         child: SizedBox(
           height: 150,
           child: Row(
             children: [
-              SizedBox(
-                width: 150,
-                height: 150,
-                child: employee.imageUrl != null
-                    ? Image.network(
-                  employee.imageUrl!,
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  bottomLeft: Radius.circular(15),
+                ),
+                child: SizedBox(
                   width: 150,
                   height: 150,
-                  fit: BoxFit.cover,
-                )
-                    : Container(
-                  width: 150,
-                  height: 150,
-                  color: Colors.grey,
-                  child: Icon(Icons.image_not_supported),
+                  child: employee.imageUrl != null
+                      ? Image.network(
+                    employee.imageUrl!,
+                    width: 150,
+                    height: 150,
+                    fit: BoxFit.cover,
+                  )
+                      : Container(
+                    width: 150,
+                    height: 150,
+                    color: Colors.grey,
+                    child: Icon(Icons.image_not_supported),
+                  ),
                 ),
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(5.0),
+                  padding: const EdgeInsets.all(10.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -190,26 +192,38 @@ class EmployeeCard extends StatelessWidget {
                       Text(
                         'Mobile: ${employee.mobile}',
                         style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                          color: Colors.black54,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Email: ${employee.email}',
                         style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Joining Date: ${employee.joiningDate}',
+                        style: const TextStyle(
+                          color: Colors.black54,
                         ),
                       ),
                       const Spacer(),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           MediumButton(
-                            btnText: 'Employee',
+                            btnText: '${employee.status?.capitalize()}',
                             onPressed: () {
-                              // Handle action for Employee button
+                              // Handle action for Status button
+                            },
+                          ),
+                          SizedBox(width: 8),
+                          MediumButton(
+                            btnText: '${employee.role?.capitalize()}',
+                            onPressed: () {
+                              // Handle action for Role button
                             },
                           ),
                         ],
@@ -237,19 +251,29 @@ class MediumButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Color(0xFF0DA487),
+        backgroundColor: Colors.white,
+        side: BorderSide(color: Color(0xFF0DA487)),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       child: Text(
         btnText,
         style: TextStyle(
-          color: Colors.white,
+          color: Color(0xFF0DA487),
           fontWeight: FontWeight.bold,
         ),
       ),
     );
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    if (this == null) {
+      return this;
+    }
+    return '${this[0].toUpperCase()}${this.substring(1).toLowerCase()}';
   }
 }
