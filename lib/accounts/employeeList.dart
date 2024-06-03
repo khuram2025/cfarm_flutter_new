@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled3/accounts/EditEmployeePage.dart';
 import '../home/customDrawer.dart';
 import '../home/finCustomeAppbar.dart';
 import '../models/employees.dart';
@@ -163,7 +164,7 @@ class EmployeeCard extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => AddEmployeePage(),
+                                      builder: (context) => EditEmployeePage(employeeId: employee.id),
                                     ),
                                   ).then((_) {
                                     onEmployeeUpdated(); // Refresh the employee list after returning from AddEmployeePage
