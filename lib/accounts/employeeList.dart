@@ -163,7 +163,7 @@ class EmployeeCard extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => AddEmployeePage(employeeId: employee.id),
+                                      builder: (context) => AddEmployeePage(),
                                     ),
                                   ).then((_) {
                                     onEmployeeUpdated(); // Refresh the employee list after returning from AddEmployeePage
