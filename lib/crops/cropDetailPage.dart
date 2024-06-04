@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../widgets/taskListPage.dart';
-import 'taskListPage.dart';
+import 'package:untitled3/crops/widgets/harvestEditPage.dart';
+import 'package:untitled3/crops/widgets/noteCreatePage.dart';
+import 'package:untitled3/crops/widgets/noteListTab.dart';
+import 'package:untitled3/crops/widgets/harvestListTab.dart';
+
 import '../home/customDrawer.dart';
+import '../models/crops.dart';
 import '../models/fields.dart';
-import '../widgets/CropActivityCard.dart';
-import '../widgets/crop_card.dart';
+import '../widgets/taskListPage.dart';
 
 const String baseUrl = 'http://farmapp.channab.com';
 
@@ -23,101 +26,44 @@ class CropDetailPage extends StatefulWidget {
 
 class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStateMixin {
   late TabController _tabController;
-
-
+  final ValueNotifier<int> _activeTabIndex = ValueNotifier<int>(0);
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
-
-
+    _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      _activeTabIndex.value = _tabController.index;
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _activeTabIndex.dispose();
     super.dispose();
   }
 
-
-
-
-
-  List<Widget> _buildTabs() {
-    return [
-      Tab(text: 'Info'),
-      Tab(text: 'Notes'),
-      Tab(text: 'Harvest'),
-      Tab(text: 'Tasks'),
-    ];
-  }
-
-  List<Widget> _buildActivityTabs() {
-    return [
-      Tab(text: 'Upcoming'),
-      Tab(text: 'Previous'),
-    ];
-  }
-
-  List<Widget> _buildTabViews() {
-    return [
-      _buildInfoTab(),
-      _buildNotesTab(),
-      _buildHarvestingTab(),
-      _buildTasksTab(),
-    ];
-  }
-
-
-
-  Widget _buildInfoTab() {
-    return Center(
-      child: Text('Crop Info: ${widget.crop.name}'),
-    );
-  }
-
-
-  Widget _buildNotesTab() {
-    return Center(
-      child: Text('Notes for Crop: ${widget.crop.name}'),
-    );
-  }
-
-  Widget _buildHarvestingTab() {
-    return Center(
-      child: Text('Harvesting Info for Crop: ${widget.crop.name}'),
-    );
-  }
-
-
-  Widget _buildTasksTab() {
-    return TaskListPage(cropId: widget.crop.id);
-  }
-
-
-  Future<void> _deleteCrop() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('auth_token');
-
-    final response = await http.delete(
-      Uri.parse('$baseUrl/crops/api/crops/${widget.crop.id}/'),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Token $token",
-      },
-    );
-
-    if (response.statusCode == 204) {
-      Navigator.pop(context, true); // Indicate that the crop was deleted
-    } else {
-      print('Failed to delete crop with status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
+  void _addButtonAction(BuildContext context, int index) {
+    if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => NoteCreatePage(cropId: widget.crop.id)),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HarvestEditPage(cropId: widget.crop.id)),
+      ).then((value) {
+        if (value == true) {
+          setState(() {
+            // Refresh the harvest list
+          });
+        }
+      });
+    } else if (index == 3) {
+      // Add Task action
     }
-  }
-
-  void _editCrop() {
-    // Navigate to the edit crop page
   }
 
   @override
@@ -125,7 +71,7 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
     return Scaffold(
       drawer: CustomDrawer(),
       body: DefaultTabController(
-        length: 6,
+        length: 4, // Updated length to match the number of tabs
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
@@ -186,6 +132,27 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
                         onPressed: _deleteCrop,
                         color: Colors.red,
                       ),
+                      ValueListenableBuilder<int>(
+                        valueListenable: _activeTabIndex,
+                        builder: (context, index, _) {
+                          return ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF0DA487),
+                            ),
+                            onPressed: () => _addButtonAction(context, index),
+                            child: Text(
+                              index == 1
+                                  ? 'Add Note'
+                                  : index == 2
+                                  ? 'Add Harvest'
+                                  : index == 3
+                                  ? 'Add Task'
+                                  : '',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ],
@@ -218,6 +185,53 @@ class _CropDetailPageState extends State<CropDetailPage> with TickerProviderStat
           ),
         ),
       ),
+      floatingActionButton: _activeTabIndex.value == 1 || _activeTabIndex.value == 2 || _activeTabIndex.value == 3
+          ? FloatingActionButton(
+        backgroundColor: Color(0xFF0DA487),
+        child: Icon(Icons.add),
+        onPressed: () => _addButtonAction(context, _activeTabIndex.value),
+      )
+          : null,
     );
+  }
+
+  void _editCrop() {
+    // Implement the edit crop functionality
+  }
+
+  void _deleteCrop() {
+    // Implement the delete crop functionality
+  }
+
+  List<Widget> _buildTabs() {
+    return [
+      Tab(text: 'Info'),
+      Tab(text: 'Notes'),
+      Tab(text: 'Harvest'),
+      Tab(text: 'Tasks'),
+    ];
+  }
+
+  List<Widget> _buildTabViews() {
+    return [
+      _buildInfoTab(),
+      _buildNotesTab(),
+      HarvestListPage(cropId: widget.crop.id),  // Updated to use the new HarvestListPage
+      _buildTasksTab(),
+    ];
+  }
+
+  Widget _buildInfoTab() {
+    return Center(
+      child: Text('Crop Info: ${widget.crop.name}'),
+    );
+  }
+
+  Widget _buildNotesTab() {
+    return NotesListPage(cropId: widget.crop.id);
+  }
+
+  Widget _buildTasksTab() {
+    return TaskListPage(cropId: widget.crop.id);
   }
 }

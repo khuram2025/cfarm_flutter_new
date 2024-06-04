@@ -8,11 +8,12 @@ import 'Finance/transactionFilter.dart';
 import 'Finance/transactionsScreen.dart';
 import 'accounts/login.dart';
 import 'Finance/addTransaction.dart';
-
 import 'crops/feildsList.dart';
+import 'crops/widgets/noteListTab.dart';
 import 'dairy/AnimalListPage.dart';
 import 'dairy/AnimalsWeightList.dart';
 import 'home/homePage.dart';
+import 'crops/widgets/noteCreatePage.dart'; // Ensure this import is correct
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,8 +58,20 @@ class MyApp extends StatelessWidget {
         '/animalsweightlist': (context) => AnimalWeightListPage(),
         '/feilds': (context) => FieldListPage(),
         '/employees': (context) => EmployeeListPage(),
-
-
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/notes') {
+          final cropId = settings.arguments as int;
+          return MaterialPageRoute(
+            builder: (context) => NotesListPage(cropId: cropId),
+          );
+        } else if (settings.name == '/create-note') {
+          final cropId = settings.arguments as int;
+          return MaterialPageRoute(
+            builder: (context) => NoteCreatePage(cropId: cropId),
+          );
+        }
+        return null;
       },
     );
   }
