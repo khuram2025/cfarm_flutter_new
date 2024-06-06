@@ -82,3 +82,35 @@ class AnimalWeightRecord {
 
 
 
+class MilkRecord {
+  final int animalId;
+  final String date;
+  final double firstTime;
+  final double secondTime;
+  final double thirdTime;
+  final double totalMilk;
+
+  MilkRecord({
+    required this.animalId,
+    required this.date,
+    required this.firstTime,
+    required this.secondTime,
+    required this.thirdTime,
+    required this.totalMilk,
+  });
+
+  factory MilkRecord.fromJson(Map<String, dynamic> json) {
+    return MilkRecord(
+      animalId: json['animal'],
+      date: json['date'],
+      firstTime: double.parse(json['first_time']),
+      secondTime: double.parse(json['second_time']),
+      thirdTime: double.parse(json['third_time']),
+      totalMilk: double.parse(json['total_milk']),
+    );
+  }
+
+  String get animalTag => 'Animal $animalId'; // Mocking the tag since it's not provided
+}
+
+

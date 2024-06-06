@@ -12,6 +12,7 @@ import 'crops/feildsList.dart';
 import 'crops/widgets/noteListTab.dart';
 import 'dairy/AnimalListPage.dart';
 import 'dairy/AnimalsWeightList.dart';
+import 'dairy/MilkListRecord.dart';
 import 'home/homePage.dart';
 import 'crops/widgets/noteCreatePage.dart'; // Ensure this import is correct
 
@@ -58,6 +59,8 @@ class MyApp extends StatelessWidget {
         '/animalsweightlist': (context) => AnimalWeightListPage(),
         '/feilds': (context) => FieldListPage(),
         '/employees': (context) => EmployeeListPage(),
+        '/milk-records': (context) => MilkRecordList(),
+
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/notes') {
